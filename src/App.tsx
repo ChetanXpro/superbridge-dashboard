@@ -8,13 +8,14 @@ import {
   ChainSlug,
 } from "@socket.tech/socket-plugs";
 import "./App.css";
+import Dashboard from "./components/Dashboard/Dashboard";
 
 function App() {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
     useState<DeploymentMode>(DeploymentMode.PROD);
   const [selectedProject, setSelectedProject] = useState<Project>(Project.AEVO);
   const [chains, setChains] = useState() as any;
-  const [selectedChains, setSelectedChains] = useState();
+  const [selectedChains, setSelectedChains] = useState("");
 
   const get = async () => {
     console.log(selectedDeploymentMode);
@@ -442,16 +443,6 @@ function App() {
       provider
     );
 
-    // function formatUnits(
-    //   value: BigNumberish,
-    //   decimals: string | BigNumberish = 0,
-    //   maxDecimalDigits?: number
-    // ) {
-    //   return ethers.FixedNumber..from(ethers.formatUnits(value, decimals))
-    //     .round(maxDecimalDigits ?? ethers.BigNumber.from(decimals).toNumber())
-    //     .toString();
-    // }
-
     async function callContractFunction() {
       try {
         const result = await contract["getUnlockLimitParams"](
@@ -482,17 +473,71 @@ function App() {
     await callContractFunction();
   };
 
+  // return (
+  //   <>
+  //     <div className="flex flex-col">
+  //       <button onClick={get}>get</button>
+  //       <select
+  //         onChange={(e) => {
+  //           setSelectedDeploymentMode(e.target.value as DeploymentMode);
+  //         }}
+  //         value={selectedDeploymentMode}
+  //         name=""
+  //         id=""
+  //       >
+  //         {Object.values(DeploymentMode).map((mode) => (
+  //           <option key={mode} value={mode}>
+  //             {mode}
+  //           </option>
+  //         ))}
+  //       </select>
+
+  //       <select
+  //         onChange={(e) => {
+  //           setSelectedProject(e.target.value as Project);
+  //         }}
+  //         value={selectedProject}
+  //         name=""
+  //         id=""
+  //       >
+  //         {Object.values(Project).map((project) => (
+  //           <option key={project} value={project}>
+  //             {project}
+  //           </option>
+  //         ))}
+  //       </select>
+
+  //       {chains && (
+  //         <select name="" id="">
+  //           {Object.values(chains).map((chain: any) => (
+  //             <option key={chain} value={chain}>
+  //               {ChainSlug[chain]}
+  //             </option>
+  //           ))}
+  //         </select>
+  //       )}
+
+  //       <button onClick={fetchLimit}>Fetch limit</button>
+  //     </div>
+  //   </>
+  // );
   return (
-    <>
-      <div className="flex flex-col">
-        <button onClick={get}>get</button>
+    <div className="flex flex-col items-center bg- -300 justify-center h-screen">
+      <Dashboard />
+      {/* <button
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+        onClick={get}
+      >
+        Get
+      </button>
+
+      <div className="flex space-x-4 mt-4">
         <select
-          onChange={(e) => {
-            setSelectedDeploymentMode(e.target.value as DeploymentMode);
-          }}
+          onChange={(e) =>
+            setSelectedDeploymentMode(e.target.value as DeploymentMode)
+          }
           value={selectedDeploymentMode}
-          name=""
-          id=""
+          className="border rounded px-2 py-1"
         >
           {Object.values(DeploymentMode).map((mode) => (
             <option key={mode} value={mode}>
@@ -502,12 +547,9 @@ function App() {
         </select>
 
         <select
-          onChange={(e) => {
-            setSelectedProject(e.target.value as Project);
-          }}
+          onChange={(e) => setSelectedProject(e.target.value as Project)}
           value={selectedProject}
-          name=""
-          id=""
+          className="border rounded px-2 py-1"
         >
           {Object.values(Project).map((project) => (
             <option key={project} value={project}>
@@ -517,18 +559,27 @@ function App() {
         </select>
 
         {chains && (
-          <select name="" id="">
-            {Object.values(chains).map((chain: any) => (
+          <select
+            onChange={(e) => setSelectedChains(e.target.value)}
+            value={selectedChains || ""}
+            className="border rounded px-2 py-1"
+          >
+            {chains.map((chain: string) => (
               <option key={chain} value={chain}>
-                {ChainSlug[chain]}
+                {ChainSlug[chain as any]}
               </option>
             ))}
           </select>
         )}
-
-        <button onClick={fetchLimit}>Fetch limit</button>
       </div>
-    </>
+
+      <button
+        className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+        onClick={fetchLimit}
+      >
+        Fetch Limit
+      </button> */}
+    </div>
   );
 }
 
