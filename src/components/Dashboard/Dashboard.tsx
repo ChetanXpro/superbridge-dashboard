@@ -3,23 +3,38 @@ import {
   DeploymentMode,
   Project,
   getSuperBridgeAddresses,
+  Tokens,
+  ProjectAddresses,
 } from "@socket.tech/socket-plugs";
-import { Button, Select } from "antd";
+import { ChainId } from "@socket.tech/dl-core";
+
+import { Button, Select, Spin } from "antd";
 import { ethers } from "ethers";
 import React, { useState } from "react";
-import { contractABI } from "../../constracts/ContractAbi";
+import {
+  contractABI as nonAppChain,
+  contractABI,
+} from "../../contracts/ContractAbi";
+import { appChain } from "../../contracts/AppChain";
+import { RpcEnum, tokenDecimals } from "../../constants/consts";
+// import fetchEnumDefinitions from "../../helper/enum-service";
+import DetailsCard from "../DetailCard/DetailsCard";
 
 const Dashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
     useState<DeploymentMode>(DeploymentMode.PROD);
+  const [selectedChain, setSelectedChain] = useState<any>();
 
+  const [fetchedResults, setFetchedResults] = useState<any>({});
   const [selectedProject, setSelectedProject] = useState<Project>();
+  const [isFetchingLimits, setIsFetchingResults] = useState(false);
   const [chains, setChains] = useState([]) as any;
-  const [selectedChainsDetails, setSelectedChainsDetails] = useState({});
+  const [selectedChainsDetails, setSelectedChainsDetails] = useState<any>();
   const handleModeChange = (e: any) => {
     const mode = e;
     setSelectedDeploymentMode(mode);
   };
+
   const allDeploymentModes = [
     {
       label: "Production",
@@ -44,8 +59,8 @@ const Dashboard = () => {
   });
 
   const getChains = async () => {
-    console.log(selectedDeploymentMode);
-    console.log(selectedProject);
+    // console.log(selectedDeploymentMode);
+    // console.log(selectedProject);
 
     if (!selectedDeploymentMode || !selectedProject)
       return alert("Select All Fields");
@@ -64,11 +79,204 @@ const Dashboard = () => {
       });
     });
 
-    setSelectedChainsDetails(addresses);
+    setSelectedChainsDetails(addresses as ProjectAddresses);
   };
 
+  let collect: any = [];
+  async function callContractFunction({
+    rpcUrl,
+    tokenDecimal,
+    functionToCall,
+    contractAddress,
+    connectorAddressList,
+    token,
+    contractABI,
+    isAppChain,
+  }: {
+    rpcUrl: string;
+    tokenDecimal: number;
+    functionToCall: {
+      paramsForLockOrMint: string;
+      paramsForUnlockOrBurn: string;
+      getCurrentLockOrMintLimit: string;
+      getCurrentBurnOrUnlockLimit: string;
+    };
+    contractAddress: string;
+    connectorAddressList: any;
+    token: string;
+    contractABI: any;
+    isAppChain: boolean;
+  }) {
+    try {
+      setIsFetchingResults(true);
+      // console.log(
+      //   rpcUrl,
+      //   tokenDecimal,
+      //   functionToCall,
+      //   contractAddress,
+      //   connectorAddressList,
+      //   token,
+      //   contractABI
+      // );
+
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+      const contract = new ethers.Contract(
+        contractAddress,
+        contractABI,
+        provider
+      );
+
+      let connectorsResultArr = [];
+
+      for (const connector in connectorAddressList) {
+        const currentConnector = connectorAddressList[connector];
+
+        for (const curr in currentConnector) {
+          // console.log(functionToCall, currentConnector[curr]);
+
+          // return {
+          //   paramsForLockOrMint: "getLockLimitParams",
+          //   paramsForUnlockOrBurn: "getUnlockLimitParams",
+          //   getCurrentLockOrMintLimit: "getCurrentLockLimit",
+          //   getCurrentBurnOrUnlockLimit: "getCurrentUnlockLimit",
+          // };
+          const constructResult = (
+            tokenDecimal: number,
+            result: any,
+            currentLimit: any
+          ) => {
+            // console.log("DATA TO CONTRUCT", data);
+            try {
+              const maxValue = BigInt(Number.MAX_SAFE_INTEGER);
+              const obj: any = {};
+              Object.values(result).forEach((value: any, index: any) => {
+                // console.log("index", index);
+
+                if (index === 0) {
+                  // const date = new Date(Number(value) * 1000);
+                  obj["lastUpdateTimestamp"] = Number(value);
+                } else if (index === 1) {
+                  obj["ratePerSecond"] = ethers.formatUnits(
+                    value,
+                    tokenDecimal
+                  );
+                } else if (index === 2) {
+                  const maxLimit =
+                    BigInt(value) > maxValue ? value : BigInt(value);
+                  obj["maxLimit"] = ethers.formatUnits(maxLimit, tokenDecimal);
+                } else if (index === 3) {
+                  const lastUpdateLimit =
+                    BigInt(value) > maxValue ? value : BigInt(value);
+                  obj["lastUpdateLimit"] = ethers.formatUnits(
+                    lastUpdateLimit,
+                    tokenDecimal
+                  );
+                }
+              });
+
+              // const currentLimit = calculateLimit(obj);
+              const currentLimitValue =
+                BigInt(currentLimit) > maxValue
+                  ? currentLimit
+                  : BigInt(currentLimit);
+
+              obj["currentLimit"] = ethers.formatUnits(
+                currentLimitValue,
+                tokenDecimal
+              );
+
+              return obj;
+            } catch (error) {
+              console.log("Error in Result construct", error);
+            }
+          };
+
+          console.log(
+            "resultParamsForLockOrMint",
+            functionToCall.paramsForLockOrMint,
+            "RPC",
+            rpcUrl
+          );
+          console.log(
+            "resultParamsForUnlockOrBurn",
+            functionToCall.paramsForUnlockOrBurn
+          );
+          console.log(
+            "getCurrentLockOrMintLimit",
+            functionToCall.getCurrentLockOrMintLimit
+          );
+
+          console.log(
+            "getCurrentBurnOrUnlockLimit",
+            functionToCall.getCurrentBurnOrUnlockLimit
+          );
+
+          const resultParamsForLockOrMint = await contract[
+            functionToCall.paramsForLockOrMint
+          ](currentConnector[curr]);
+
+          const resultParamsForUnlockOrBurn = await contract[
+            functionToCall.paramsForUnlockOrBurn
+          ](currentConnector[curr]);
+
+          const getCurrentLockOrMintLimit = await contract[
+            functionToCall.getCurrentLockOrMintLimit
+          ](currentConnector[curr]);
+
+          const getCurrentBurnOrUnlockLimit = await contract[
+            functionToCall.getCurrentBurnOrUnlockLimit
+          ](currentConnector[curr]);
+
+          console.log("1", resultParamsForLockOrMint);
+          console.log("2", resultParamsForUnlockOrBurn);
+          console.log("3", getCurrentLockOrMintLimit);
+          console.log("4", getCurrentBurnOrUnlockLimit);
+
+          const lockOrMintLimitObject = constructResult(
+            tokenDecimal,
+            resultParamsForLockOrMint,
+            getCurrentLockOrMintLimit
+          );
+
+          const unlockOrBurnLimitObject = constructResult(
+            tokenDecimal,
+            resultParamsForUnlockOrBurn,
+            getCurrentBurnOrUnlockLimit
+          );
+
+          console.log("LockOrMint", lockOrMintLimitObject);
+          console.log("UnlockOrBurn", unlockOrBurnLimitObject);
+
+          // console.log("Result:", result);
+          const obj = {
+            token,
+            source: selectedChain,
+            DestToken: ChainId[connector as any],
+            isAppChain,
+            connectorType: curr,
+            connectorAddr: currentConnector[curr],
+            Result: {
+              LockOrMint: lockOrMintLimitObject,
+              UnlockOrBurn: unlockOrBurnLimitObject,
+            },
+          };
+
+          connectorsResultArr.push(obj);
+        }
+      }
+      console.log("===");
+
+      collect.push(...connectorsResultArr);
+    } catch (error) {
+      console.error("Error calling contract function:", error);
+    } finally {
+      setIsFetchingResults(false);
+    }
+  }
+
   const handleProjectChange = (e: any) => {
-    console.log(e);
+    // console.log(e);
 
     setSelectedProject(e);
     // getChains(selectedDeploymentMode, e);
@@ -84,73 +292,131 @@ const Dashboard = () => {
   };
 
   const fetchLimits = async () => {
-    const provider = new ethers.JsonRpcProvider(
-      "https://rpc.ankr.com/optimism"
-    );
+    // console.log(selectedChainsDetails);
 
-    const contractAddress = "0x7809621a6D7e61E400853C64b61568aA773A28Ef";
+    const currentChain = ChainSlug[selectedChain as any];
 
-    const contract = new ethers.Contract(
-      contractAddress,
-      contractABI,
-      provider
-    );
+    if (!selectedChainsDetails) return;
 
-    async function callContractFunction() {
-      try {
-        const result = await contract["getLockLimitParams"](
-          "0xF0A0B2E99D081Ee737496DAD5E2267ab12139793"
-        ); // Replace with the actual function name
-        console.log("Result:", result);
-        console.log(Object.values(result));
+    console.log(selectedChainsDetails);
 
-        Object.values(result).forEach((value: any, index: any) => {
-          // console.log("index", index);
+    const currentChainData = selectedChainsDetails[currentChain];
 
-          if (index === 0) {
-            // console.log("0", value);
-            // const date = new Date(value.toString());
-            // console.log(date);
-          }
-        });
-        const dateObjects = Object.values(result).map((timestamp) =>
-          // console.log(typeof timestamp)
-          ethers.formatUnits(timestamp, 6)
-        );
+    // const dummy = {
+    //   USDC: {
+    //     isAppChain: false,
+    //     NonMintableToken: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+    //     Vault: "0xFff4A34925301d231ddF42B871c3b199c1E80584",
+    //     connectors: {
+    //       "2999": {
+    //         FAST: "0x1812ff6bd726934f18159164e2927B34949B16a8",
+    //         SLOW: "0x1812ff6bd726934f18159164e2927B34949B16a8",
+    //       },
+    //     },
+    //   },
+    //   WETH: {
+    //     isAppChain: false,
+    //     NonMintableToken: "0x4200000000000000000000000000000000000006",
+    //     Vault: "0x5c7Dd6cb73d93879E94F20d103804C495A10aE7e",
+    //     connectors: {
+    //       "2999": {
+    //         FAST: "0xeCaa2435d99c4987876A0382F1661dBf539700C0",
+    //       },
+    //     },
+    //   },
+    // };
 
-        console.log(dateObjects);
+    // console.log(currentChainData);
 
-        console.log(dateObjects);
+    const whichFunctionToRun = (isAppChain: boolean) => {
+      if (!isAppChain) {
+        // return "getLockLimitParams";
 
-        // for (const key in result) {
-        //   const tokenDecimalPlaces = 18;
+        return {
+          paramsForLockOrMint: "getLockLimitParams",
+          paramsForUnlockOrBurn: "getUnlockLimitParams",
+          getCurrentLockOrMintLimit: "getCurrentLockLimit",
+          getCurrentBurnOrUnlockLimit: "getCurrentUnlockLimit",
+        };
+      } else {
+        // return "getMintLimitParams";
 
-        //   // Example: Value in the raw integer form (without decimal places)
-        //   const rawValue = ethers.parseUnits("123.456789", tokenDecimalPlaces);
-
-        //   // Format the value to a human-readable format
-        //   const formattedValue = ethers.formatUnits(
-        //     rawValue,
-        //     tokenDecimalPlaces
-        //   );
-
-        //   // console.log("Formatted Value:", formattedValue);
-        //   console.log(ethers.formatUnits(result[key], tokenDecimalPlaces));
-        // }
-      } catch (error) {
-        console.error("Error calling contract function:", error);
+        return {
+          paramsForLockOrMint: "getMintLimitParams",
+          paramsForUnlockOrBurn: "getBurnLimitParams",
+          getCurrentLockOrMintLimit: "getCurrentMintLimit",
+          getCurrentBurnOrUnlockLimit: "getCurrentBurnLimit",
+        };
       }
+    };
+
+    const whichContractAddressToUse = (isAppChain: boolean) => {
+      if (!isAppChain) {
+        return "Vault";
+      } else {
+        return "Controller";
+      }
+    };
+
+    // console.log("curr", currentChainData);
+
+    for (const token in currentChainData) {
+      // console.log(token);
+
+      const currentDetails = currentChainData[token];
+      const rpcUrl = RpcEnum[Number(ChainSlug[selectedChain])];
+      const tokenDecimal = tokenDecimals[token as Tokens];
+      const functionToCall = whichFunctionToRun(currentDetails?.isAppChain);
+      const connectorAddressList = currentDetails.connectors;
+      // console.log("connectors", connectorAddressList);
+
+      const contractAddress = whichContractAddressToUse(
+        currentDetails?.isAppChain
+      );
+      const contractABI = currentDetails?.isAppChain ? appChain : nonAppChain;
+      await callContractFunction({
+        connectorAddressList,
+        contractAddress: currentDetails[contractAddress],
+        functionToCall,
+        rpcUrl,
+        tokenDecimal,
+        token,
+        contractABI,
+        isAppChain: currentDetails?.isAppChain,
+      });
     }
-    await callContractFunction();
+
+    // for (const key in collect) {
+    //   const currentArr = collect[key];
+    // }
+    // console.log("CHECK", collect);
+
+    let obj: any = {};
+
+    collect.forEach((element: any) => {
+      if (obj[element?.token]) {
+        obj[element.token].push(element);
+      } else {
+        obj[element?.token] = [];
+        obj[element?.token].push(element);
+      }
+    });
+
+    console.log("Hmmm", obj);
+
+    setFetchedResults(obj);
   };
+
+  // console.log("Fetched", fetchedResults);
+
   return (
-    <div className="flex flex-col bg-gray-100 items-center p-10 h-full w-full">
+    <div className="flex flex-col bg-gray-100 items-center pt-10 px-4 min-h-screen w-full">
       <div>
         <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
       </div>
       <div className="flex flex-col items-center  h-[50%] mt-10">
         <div className=" flex flex-col items-center  justify-between h-[30%] gap-10  ">
-          <div className=" flex gap-2">
+          <div className=" flex gap-2  items-end">
             <div className="w-[10rem] ">
               <h1>Select mode</h1>
               <Select
@@ -180,7 +446,7 @@ const Dashboard = () => {
             </div>
           </div>
           {chains.length > 0 && (
-            <div className="w-full flex gap-3 items-center">
+            <div className="w-full flex gap-3  items-end">
               <div className="  w-full">
                 <h1>Select Chain</h1>
                 <Select
@@ -188,7 +454,9 @@ const Dashboard = () => {
                   // defaultValue={chains[0]?.value}
                   className=" w-full"
                   // style={{ width: 120 }}
-                  // onChange={handleModeChange}
+                  onChange={(e) => {
+                    setSelectedChain(e);
+                  }}
                   options={chains}
                 />
               </div>
@@ -202,34 +470,29 @@ const Dashboard = () => {
           )}
         </div>
       </div>
-      <section className="grid   grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="flex flex-wrap">
-          <div className="flex flex-col bg-blue-100 rounded-t-lg border-blue-500 border-2 shadow-lg ">
-            <div className="flex gap-5 border-b  items-center bg-blue-200 p-2 rounded-t-lg">
-              <div>
-                <p>Ethereum</p>
-              </div>
-              <div className="">
-                <svg
-                  width="31"
-                  height="20"
-                  viewBox="0 0 151 84"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+      <section className=" gap-6 flex-1 justify-center flex items-center  w-full">
+        {!isFetchingLimits ? (
+          <div className="flex flex-wrap gap-3  p-10">
+            {fetchedResults &&
+              Object.keys(fetchedResults).map((token: any, index) => (
+                <div
+                  key={index}
+                  className="bg-blue-300 rounded-lg flex flex-col items-center p-10 gap-10 "
                 >
-                  <path
-                    d="M68.1002 41.3499C50.104 41.2042 32.1079 41.0874 14.1118 40.8905C10.5249 40.8505 6.93279 40.5689 3.36035 40.2178C2.76932 40.1535 2.21142 39.9124 1.75964 39.526C1.30786 39.1395 0.983227 38.6258 0.828173 38.0518C0.53479 37.133 1.55475 35.8295 2.77291 35.6378C3.95432 35.4521 5.12976 35.1639 6.31707 35.0924C13.8997 34.633 21.4818 33.9826 29.0717 33.8454C44.665 33.5652 60.2628 33.4943 75.8594 33.4765C90.6565 33.4595 105.454 33.6446 120.251 33.6787C122.627 33.6846 125.005 33.3853 127.377 33.1733C127.534 33.1345 127.679 33.0567 127.799 32.9472C127.918 32.8377 128.008 32.6999 128.061 32.5465C128.103 32.1803 127.995 31.562 127.751 31.4307C123.204 28.9589 118.713 26.3585 114.037 24.1526C103.16 19.0207 92.9557 12.7277 82.7588 6.41374C81.0832 5.37607 79.3268 4.32201 78.6508 2.26308C78.528 1.88831 78.3364 1.24642 78.4926 1.12106C79.052 0.599398 79.7318 0.224347 80.4715 0.0295109C81.2592 -0.0634608 82.0572 0.0642497 82.7765 0.39838C85.3244 1.55222 87.854 2.75664 90.333 4.05094C108.051 13.3014 125.763 22.5621 143.469 31.8331C150.157 35.3116 153.336 38.6846 145.307 46.3329C142.994 48.5375 140.654 50.7389 138.139 52.6993C126.475 61.8006 114.768 70.8462 103.018 79.8362C101.403 80.9957 99.699 82.0271 97.9228 82.9211C96.7644 83.5499 95.6046 83.177 94.6044 82.4229C93.5037 81.5926 92.8204 79.1793 93.1998 78.118C94.0432 75.7618 95.7235 74.0329 97.5278 72.4676C104.475 66.4411 111.46 60.4579 118.481 54.518C123.044 50.6365 127.655 46.812 132.211 42.9225C132.436 42.7309 132.447 42.1349 132.356 41.7766C132.296 41.6215 132.199 41.4833 132.074 41.3737C131.949 41.2642 131.799 41.1867 131.638 41.1478C129.256 40.9916 126.871 40.7927 124.488 40.8052C105.691 40.9045 86.8948 41.0283 68.0982 41.1767L68.1002 41.3499Z"
-                    fill="black"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p>Solana</p>
-              </div>
-            </div>
-            <div>Last transaction</div>
+                  <p>{token}</p>
+                  <div className="  flex flex-wrap gap-3 ">
+                    {fetchedResults[token]?.map((item: any, index: any) => (
+                      <DetailsCard key={index} details={item} />
+                    ))}
+                  </div>
+                </div>
+              ))}
           </div>
-        </div>
+        ) : (
+          <div className="">
+            <Spin tip="Loading" size="large" className="" />
+          </div>
+        )}
       </section>
     </div>
   );
