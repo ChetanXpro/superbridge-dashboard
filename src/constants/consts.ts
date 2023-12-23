@@ -1,4 +1,4 @@
-import { ChainSlug, Tokens } from "@socket.tech/socket-plugs";
+import { Tokens } from "@socket.tech/socket-plugs";
 
 type RpcEnumType = {
   [key: number]: string;

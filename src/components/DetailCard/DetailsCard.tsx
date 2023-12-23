@@ -1,4 +1,3 @@
-import React from "react";
 import { convertTimestampToIndianDateTime } from "../../helper/basicFunctions";
 
 const DetailsCard = ({ details }: any) => {

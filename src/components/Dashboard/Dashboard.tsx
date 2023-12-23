@@ -10,11 +10,8 @@ import { ChainId } from "@socket.tech/dl-core";
 
 import { Button, Select, Spin } from "antd";
 import { ethers } from "ethers";
-import React, { useState } from "react";
-import {
-  contractABI as nonAppChain,
-  contractABI,
-} from "../../contracts/ContractAbi";
+import { useState } from "react";
+import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
 import { appChain } from "../../contracts/AppChain";
 import { RpcEnum, tokenDecimals } from "../../constants/consts";
 // import fetchEnumDefinitions from "../../helper/enum-service";
