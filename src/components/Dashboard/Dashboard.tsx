@@ -407,13 +407,13 @@ const Dashboard = () => {
   // console.log("Fetched", fetchedResults);
 
   return (
-    <div className="flex flex-col bg-gray-100 items-center pt-10 px-4 min-h-screen w-full">
+    <div className="flex flex-col bg-gray-100 items-center pt-10  min-h-screen w-full">
       <div>
         <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
       </div>
       <div className="flex flex-col items-center  h-[50%] mt-10">
         <div className=" flex flex-col items-center  justify-between h-[30%] gap-10  ">
-          <div className=" flex gap-2  items-end">
+          <div className=" flex flex-col md:flex-row gap-2     items-end ">
             <div className="w-[10rem] ">
               <h1>Select mode</h1>
               <Select
@@ -438,8 +438,10 @@ const Dashboard = () => {
                 options={allProjects}
               />
             </div>
-            <div className="h-full flex flex-col  items-end justify-end">
-              <Button onClick={getChains}>Get Chain</Button>
+            <div className="h-full flex flex-col   items-end justify-end">
+              <Button className="w-full" onClick={getChains}>
+                Get Chain
+              </Button>
             </div>
           </div>
           {chains.length > 0 && (
@@ -467,17 +469,17 @@ const Dashboard = () => {
           )}
         </div>
       </div>
-      <section className=" gap-6 flex-1 justify-center flex items-center  w-full">
+      <section className=" gap-6  flex-1 justify-center flex items-center  w-full">
         {!isFetchingLimits ? (
-          <div className="flex flex-wrap gap-3  p-10">
+          <div className="flex flex-wrap gap-3 p-2 mt-10   justify-center md:p-10">
             {fetchedResults &&
               Object.keys(fetchedResults).map((token: any, index) => (
                 <div
                   key={index}
-                  className="bg-blue-300 rounded-lg flex flex-col items-center p-10 gap-10 "
+                  className="bg-blue-300  rounded-lg w-full md:w-auto flex flex-col items-center p-2 md:p-10 gap-10 "
                 >
-                  <p>{token}</p>
-                  <div className="  flex flex-wrap gap-3 ">
+                  <h1 className="text-lg font-bold">{token}</h1>
+                  <div className="  flex flex-wrap   w-full justify-center gap-3 ">
                     {fetchedResults[token]?.map((item: any, index: any) => (
                       <DetailsCard key={index} details={item} />
                     ))}

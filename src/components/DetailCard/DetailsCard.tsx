@@ -4,7 +4,7 @@ const DetailsCard = ({ details }: any) => {
   return (
     <div
       key={"index"}
-      className="flex flex-col bg-blue-100 rounded-t-lg border-blue-500 border-2 shadow-lg "
+      className="flex flex-1 p-5 sm:flex md:flex  flex-col bg-blue-100 rounded-t-lg border-blue-500 border-2 shadow-lg "
     >
       <div className="flex gap-5 border-b  items-center bg-blue-200 p-2 rounded-t-lg">
         <div>
@@ -30,7 +30,7 @@ const DetailsCard = ({ details }: any) => {
       </div>
       <div className="flex flex-col gap-3 p-2">
         <div className="flex gap-3">
-          <p>Connector :</p>
+          <p className="font-bold">Connector :</p>
           <p>{details?.connectorType}</p>
         </div>
         <div className="flex gap-3">
@@ -41,47 +41,51 @@ const DetailsCard = ({ details }: any) => {
         <h1 className="text-xl font-bold">
           {details?.isAppChain ? "Mint Limit" : "Lock Limit"}
         </h1>
-        <div className="flex gap-3">
-          <p>Current {details?.isAppChain ? "Mint" : "Lock"} Limit :</p>
+        <div className="md:flex md:gap-3">
+          <p className="font-bold">
+            Current {details?.isAppChain ? "Mint" : "Lock"} Limit :
+          </p>
           <p>{details?.Result?.LockOrMint?.currentLimit}</p>
         </div>
-        <div className="flex gap-3">
-          <p>Max limit :</p>
+        <div className="md:flex md:gap-3">
+          <p className="font-bold">Max limit :</p>
           <p>{details?.Result?.LockOrMint?.maxLimit}</p>
         </div>
-        <div className="flex gap-3">
-          <p>Last Update :</p>
+        <div className=" md:flex md:gap-3">
+          <p className="font-bold">Last Update :</p>
           <p>
             {convertTimestampToIndianDateTime(
               details?.Result?.LockOrMint?.lastUpdateTimestamp
             )}
           </p>
         </div>
-        <div className="flex gap-3">
-          <p>Last Update Limit :</p>
+        <div className="md:flex md:gap-3">
+          <p className="font-bold">Last Update Limit :</p>
           <p>{details?.Result?.LockOrMint?.lastUpdateLimit}</p>
         </div>
         <h1 className="text-xl font-bold">
           {details?.isAppChain ? "Burn Limit" : "Unlock Limit"}
         </h1>
-        <div className="flex gap-3">
-          <p>Current {details?.isAppChain ? "Burn" : "Unlock"}Limit :</p>
+        <div className="md:flex md:gap-3">
+          <p className="font-bold">
+            Current {details?.isAppChain ? "Burn" : "Unlock"}Limit :
+          </p>
           <p>{details?.Result?.UnlockOrBurn?.currentLimit}</p>
         </div>
-        <div className="flex gap-3">
-          <p>Max limit :</p>
+        <div className="md:flex md:gap-3">
+          <p className="font-bold">Max limit :</p>
           <p>{details?.Result?.UnlockOrBurn?.maxLimit}</p>
         </div>
-        <div className="flex gap-3">
-          <p>Last Update :</p>
+        <div className="md:flex md:gap-3">
+          <p className="font-bold">Last Update :</p>
           <p>
             {convertTimestampToIndianDateTime(
               details?.Result?.UnlockOrBurn?.lastUpdateTimestamp
             )}
           </p>
         </div>
-        <div className="flex gap-3">
-          <p>Last Update Limit :</p>
+        <div className="md:flex md:gap-3">
+          <p className="font-bold">Last Update Limit :</p>
           <p>{details?.Result?.UnlockOrBurn?.lastUpdateLimit}</p>
         </div>
       </div>
