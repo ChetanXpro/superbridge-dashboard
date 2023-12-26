@@ -6,6 +6,7 @@ import {
   Tokens,
   ProjectAddresses,
 } from "@socket.tech/socket-plugs";
+import toast, { Toaster } from "react-hot-toast";
 import { ChainId } from "@socket.tech/dl-core";
 
 import { Button, Select, Spin } from "antd";
@@ -30,6 +31,7 @@ const Dashboard = () => {
   const handleModeChange = (e: any) => {
     const mode = e;
     setSelectedDeploymentMode(mode);
+    getChains(selectedProject!, e);
   };
 
   const allDeploymentModes = [
@@ -55,28 +57,42 @@ const Dashboard = () => {
     };
   });
 
-  const getChains = async () => {
+  const getChains = async (project: string, mode: string) => {
     // console.log(selectedDeploymentMode);
     // console.log(selectedProject);
+    try {
+      if (!selectedDeploymentMode) return alert("Select All Fields");
+      console.log("Project", project);
+      console.log("Deployment", mode);
 
-    if (!selectedDeploymentMode || !selectedProject)
-      return alert("Select All Fields");
+      if (selectedDeploymentMode && !project) return;
 
-    const addresses = await getSuperBridgeAddresses(
-      selectedDeploymentMode || DeploymentMode.PROD,
-      (selectedProject as Project) || Project.AEVO
-    );
+      setSelectedChain(undefined);
+      setSelectedProject(project as Project);
 
-    setChains(() => {
-      return Object.keys(addresses).map((address: any) => {
-        return {
-          label: ChainSlug[address],
-          value: ChainSlug[address],
-        };
+      const addresses = await getSuperBridgeAddresses(
+        (mode as DeploymentMode) || DeploymentMode.PROD,
+        (project as Project) || Project.AEVO
+      );
+
+      setChains(() => {
+        return Object.keys(addresses).map((address: any) => {
+          return {
+            label: ChainSlug[address],
+            value: ChainSlug[address],
+          };
+        });
       });
-    });
+      setSelectedChain(ChainSlug[Object.keys(addresses)[0] as any]);
 
-    setSelectedChainsDetails(addresses as ProjectAddresses);
+      setSelectedChainsDetails(addresses as ProjectAddresses);
+    } catch (error) {
+      console.log(error);
+      toast.error(`Error fetching chains for Mode ${mode} Project ${project}`, {
+        duration: 5000,
+        position: "top-right",
+      });
+    }
   };
 
   let collect: any = [];
@@ -130,14 +146,6 @@ const Dashboard = () => {
         const currentConnector = connectorAddressList[connector];
 
         for (const curr in currentConnector) {
-          // console.log(functionToCall, currentConnector[curr]);
-
-          // return {
-          //   paramsForLockOrMint: "getLockLimitParams",
-          //   paramsForUnlockOrBurn: "getUnlockLimitParams",
-          //   getCurrentLockOrMintLimit: "getCurrentLockLimit",
-          //   getCurrentBurnOrUnlockLimit: "getCurrentUnlockLimit",
-          // };
           const constructResult = (
             tokenDecimal: number,
             result: any,
@@ -148,27 +156,25 @@ const Dashboard = () => {
               const maxValue = BigInt(Number.MAX_SAFE_INTEGER);
               const obj: any = {};
               Object.values(result).forEach((value: any, index: any) => {
-                // console.log("index", index);
-
                 if (index === 0) {
                   // const date = new Date(Number(value) * 1000);
                   obj["lastUpdateTimestamp"] = Number(value);
                 } else if (index === 1) {
-                  obj["ratePerSecond"] = ethers.formatUnits(
-                    value,
-                    tokenDecimal
-                  );
+                  obj["ratePerSecond"] = Number(
+                    ethers.formatUnits(value, tokenDecimal)
+                  ).toFixed(2);
                 } else if (index === 2) {
                   const maxLimit =
                     BigInt(value) > maxValue ? value : BigInt(value);
-                  obj["maxLimit"] = ethers.formatUnits(maxLimit, tokenDecimal);
+                  obj["maxLimit"] = Number(
+                    ethers.formatUnits(maxLimit, tokenDecimal)
+                  ).toFixed(2);
                 } else if (index === 3) {
                   const lastUpdateLimit =
                     BigInt(value) > maxValue ? value : BigInt(value);
-                  obj["lastUpdateLimit"] = ethers.formatUnits(
-                    lastUpdateLimit,
-                    tokenDecimal
-                  );
+                  obj["lastUpdateLimit"] = Number(
+                    ethers.formatUnits(lastUpdateLimit, tokenDecimal)
+                  ).toFixed(2);
                 }
               });
 
@@ -178,10 +184,9 @@ const Dashboard = () => {
                   ? currentLimit
                   : BigInt(currentLimit);
 
-              obj["currentLimit"] = ethers.formatUnits(
-                currentLimitValue,
-                tokenDecimal
-              );
+              obj["currentLimit"] = Number(
+                ethers.formatUnits(currentLimitValue, tokenDecimal)
+              ).toFixed(2);
 
               return obj;
             } catch (error) {
@@ -189,25 +194,25 @@ const Dashboard = () => {
             }
           };
 
-          console.log(
-            "resultParamsForLockOrMint",
-            functionToCall.paramsForLockOrMint,
-            "RPC",
-            rpcUrl
-          );
-          console.log(
-            "resultParamsForUnlockOrBurn",
-            functionToCall.paramsForUnlockOrBurn
-          );
-          console.log(
-            "getCurrentLockOrMintLimit",
-            functionToCall.getCurrentLockOrMintLimit
-          );
+          // console.log(
+          //   "resultParamsForLockOrMint",
+          //   functionToCall.paramsForLockOrMint,
+          //   "RPC",
+          //   rpcUrl
+          // );
+          // console.log(
+          //   "resultParamsForUnlockOrBurn",
+          //   functionToCall.paramsForUnlockOrBurn
+          // );
+          // console.log(
+          //   "getCurrentLockOrMintLimit",
+          //   functionToCall.getCurrentLockOrMintLimit
+          // );
 
-          console.log(
-            "getCurrentBurnOrUnlockLimit",
-            functionToCall.getCurrentBurnOrUnlockLimit
-          );
+          // console.log(
+          //   "getCurrentBurnOrUnlockLimit",
+          //   functionToCall.getCurrentBurnOrUnlockLimit
+          // );
 
           const resultParamsForLockOrMint = await contract[
             functionToCall.paramsForLockOrMint
@@ -225,11 +230,6 @@ const Dashboard = () => {
             functionToCall.getCurrentBurnOrUnlockLimit
           ](currentConnector[curr]);
 
-          console.log("1", resultParamsForLockOrMint);
-          console.log("2", resultParamsForUnlockOrBurn);
-          console.log("3", getCurrentLockOrMintLimit);
-          console.log("4", getCurrentBurnOrUnlockLimit);
-
           const lockOrMintLimitObject = constructResult(
             tokenDecimal,
             resultParamsForLockOrMint,
@@ -242,8 +242,8 @@ const Dashboard = () => {
             getCurrentBurnOrUnlockLimit
           );
 
-          console.log("LockOrMint", lockOrMintLimitObject);
-          console.log("UnlockOrBurn", unlockOrBurnLimitObject);
+          // console.log("LockOrMint", lockOrMintLimitObject);
+          // console.log("UnlockOrBurn", unlockOrBurnLimitObject);
 
           // console.log("Result:", result);
           const obj = {
@@ -262,7 +262,6 @@ const Dashboard = () => {
           connectorsResultArr.push(obj);
         }
       }
-      console.log("===");
 
       collect.push(...connectorsResultArr);
     } catch (error) {
@@ -407,78 +406,109 @@ const Dashboard = () => {
   // console.log("Fetched", fetchedResults);
 
   return (
-    <div className="flex flex-col bg-gray-100 items-center pt-10  min-h-screen w-full">
-      <div>
-        <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
-      </div>
-      <div className="flex flex-col items-center  h-[50%] mt-10">
-        <div className=" flex flex-col items-center  justify-between h-[30%] gap-10  ">
-          <div className=" flex flex-col md:flex-row gap-2     items-end ">
-            <div className="w-[10rem] ">
-              <h1>Select mode</h1>
-              <Select
-                className="w-full"
-                defaultValue={DeploymentMode.PROD}
-                // style={{ width: 120 }}
-                onChange={handleModeChange}
-                options={allDeploymentModes}
-              />
+    <div className="flex flex-col bg-black items-center   min-h-screen w-full">
+      <div className="flex flex-col   pb-10 w-full items-center ">
+        <div className="bg-[#801fe1] md:h-[19rem]   w-full items-center md:items-start   flex flex-col justify-between rounded-b-3xl">
+          <div className=" p-3">
+            <img src="/socket-white-logo.png" width={150} height={150} />
+          </div>
+
+          <div className="  flex justify-between flex-col   lg:flex-row w-full pl-1  items-center flex-1">
+            <div className="">
+              <h1 className=" text-3xl md:text-6xl text-nowrap mb-4">
+                Superbridge Dashboard
+              </h1>
             </div>
-            <div className="  w-[10rem]">
-              <h1>Select Project</h1>
-              <Select
-                className="w-full"
-                showSearch
-                placeholder="Select a person"
-                optionFilterProp="children"
-                // defaultValue={Project.AEVO}
-                onChange={handleProjectChange}
-                onSearch={onSearch}
-                filterOption={filterOption}
-                options={allProjects}
-              />
-            </div>
-            <div className="h-full flex flex-col   items-end justify-end">
-              <Button className="w-full" onClick={getChains}>
-                Get Chain
-              </Button>
+            <div className=" h-full flex  flex-col w-full  justify-center  items-center bg-[#EEEEEE]  p-3 mr-1 rounded-2xl mb-6 md:mx-10">
+              <div className="gap-3 flex flex-col items-center     ">
+                <div className=" flex  gap-2   rounded-lg    w-full justify-center items-center  h-full ">
+                  <div className=" ">
+                    <h1 className="">Select mode</h1>
+                    <Select
+                      size="large"
+                      className="w-full"
+                      defaultValue={DeploymentMode.PROD}
+                      // style={{ width: 120 }}
+                      onSelect={(e) => {
+                        handleModeChange(e);
+                        // getChains(selectedProject!);
+                      }}
+                      options={allDeploymentModes}
+                    />
+                  </div>
+                  <div className="  w-[10rem]">
+                    <h1>Select Project</h1>
+                    <Select
+                      className="w-full"
+                      size="large"
+                      showSearch
+                      placeholder="Select a person"
+                      optionFilterProp="children"
+                      onSelect={(e: any) => {
+                        getChains(e, selectedDeploymentMode);
+                      }}
+                      // defaultValue={Project.AEVO}
+                      onChange={handleProjectChange}
+                      onSearch={onSearch}
+                      filterOption={filterOption}
+                      options={allProjects}
+                    />
+                  </div>
+                  {/* <div className="h-full flex flex-col   items-end justify-end">
+                <Button className="w-full">Get Chain</Button>
+              </div> */}
+                </div>
+                {/* {chains.length > 0 && ( */}
+                <div
+                  className={` flex gap-1  flex-col md:flex-row     items-end w-full ${
+                    chains.length > 0 ? "block" : "hidden"
+                  } `}
+                >
+                  <div className=" w-full">
+                    <h1>Select Chain</h1>
+
+                    <Select
+                      size="large"
+                      placeholder="Select a Chain"
+                      // defaultValue={chains[0]?.value}
+                      value={selectedChain || chains[0]?.value}
+                      autoClearSearchValue={true}
+                      className=" w-full"
+                      // style={{ width: 120 }}
+                      onChange={(e) => {
+                        setSelectedChain(e);
+                      }}
+                      options={chains}
+                    />
+                  </div>
+
+                  <div className="h-full flex w-full  items-end">
+                    <Button
+                      disabled={chains.length === 0}
+                      onClick={fetchLimits}
+                      size="large"
+                      className="w-full"
+                    >
+                      Fetch Limits
+                    </Button>
+                  </div>
+                </div>
+                {/* )} */}
+              </div>
             </div>
           </div>
-          {chains.length > 0 && (
-            <div className="w-full flex gap-3  items-end">
-              <div className="  w-full">
-                <h1>Select Chain</h1>
-                <Select
-                  placeholder="Select a Chain"
-                  // defaultValue={chains[0]?.value}
-                  className=" w-full"
-                  // style={{ width: 120 }}
-                  onChange={(e) => {
-                    setSelectedChain(e);
-                  }}
-                  options={chains}
-                />
-              </div>
-
-              <div className="h-full flex  items-end">
-                <Button disabled={chains.length === 0} onClick={fetchLimits}>
-                  Fetch Limits
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
       <section className=" gap-6  flex-1 justify-center flex items-center  w-full">
         {!isFetchingLimits ? (
-          <div className="flex flex-wrap gap-3 p-2 mt-10   justify-center md:p-10">
+          <div className="flex flex-wrap gap-3 p-2    justify-center md:p-10">
             {fetchedResults &&
               Object.keys(fetchedResults).map((token: any, index) => (
                 <div
                   key={index}
                   className="bg-blue-300  rounded-lg w-full md:w-auto flex flex-col items-center p-2 md:p-10 gap-10 "
                 >
-                  <h1 className="text-lg font-bold">{token}</h1>
+                  <h1 className="text-2xl font-bold">{token}</h1>
                   <div className="  flex flex-wrap   w-full justify-center gap-3 ">
                     {fetchedResults[token]?.map((item: any, index: any) => (
                       <DetailsCard key={index} details={item} />

@@ -4,6 +4,7 @@ type RpcEnumType = {
   [key: number]: string;
 };
 
+// Public RPC endpoints
 export const RpcEnum: RpcEnumType = {
   42161: "https://rpc.ankr.com/arbitrum",
   421613: "https://arbitrum-goerli.public.blastapi.io",
@@ -11,7 +12,7 @@ export const RpcEnum: RpcEnumType = {
   1: "https://rpc.ankr.com/eth",
   10: "https://rpc.ankr.com/optimism",
   420: "https://endpoints.omniatech.io/v1/op/goerli/public",
-  2999: "https://mainnet.bityuan.com/eth",
+  2999: import.meta.env.VITE_APP_AEVO_RPC_URL as string,
   957: "https://rpc.lyra.finance",
   8453: "https://rpc.ankr.com/base",
   34443: "https://mainnet.mode.network",
