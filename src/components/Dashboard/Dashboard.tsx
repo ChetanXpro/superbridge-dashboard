@@ -427,7 +427,7 @@ const Dashboard = () => {
                       className="w-full"
                       size="large"
                       showSearch
-                      placeholder="Select a person"
+                      placeholder="Select a project"
                       optionFilterProp="children"
                       onSelect={(e: any) => {
                         getChains(e, selectedDeploymentMode);
