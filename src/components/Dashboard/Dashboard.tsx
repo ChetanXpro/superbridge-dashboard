@@ -348,8 +348,6 @@ const Dashboard = () => {
       }
     };
 
-    const constractPromise = [];
-
     for (const token in currentChainData) {
       const currentDetails = currentChainData[token];
       const rpcUrl = RpcEnum[Number(ChainSlug[selectedChain])];
