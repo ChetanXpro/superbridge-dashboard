@@ -322,12 +322,8 @@ const Dashboard = () => {
     //   },
     // };
 
-    // console.log(currentChainData);
-
     const whichFunctionToRun = (isAppChain: boolean) => {
       if (!isAppChain) {
-        // return "getLockLimitParams";
-
         return {
           paramsForLockOrMint: "getLockLimitParams",
           paramsForUnlockOrBurn: "getUnlockLimitParams",
@@ -335,8 +331,6 @@ const Dashboard = () => {
           getCurrentBurnOrUnlockLimit: "getCurrentUnlockLimit",
         };
       } else {
-        // return "getMintLimitParams";
-
         return {
           paramsForLockOrMint: "getMintLimitParams",
           paramsForUnlockOrBurn: "getBurnLimitParams",
@@ -354,11 +348,9 @@ const Dashboard = () => {
       }
     };
 
-    // console.log("curr", currentChainData);
+    const constractPromise = [];
 
     for (const token in currentChainData) {
-      // console.log(token);
-
       const currentDetails = currentChainData[token];
       const rpcUrl = RpcEnum[Number(ChainSlug[selectedChain])];
       const tokenDecimal = tokenDecimals[token as Tokens];
@@ -369,7 +361,9 @@ const Dashboard = () => {
       const contractAddress = whichContractAddressToUse(
         currentDetails?.isAppChain
       );
+
       const contractABI = currentDetails?.isAppChain ? appChain : nonAppChain;
+
       await callContractFunction({
         connectorAddressList,
         contractAddress: currentDetails[contractAddress],
@@ -381,11 +375,6 @@ const Dashboard = () => {
         isAppChain: currentDetails?.isAppChain,
       });
     }
-
-    // for (const key in collect) {
-    //   const currentArr = collect[key];
-    // }
-    // console.log("CHECK", collect);
 
     let obj: any = {};
 
@@ -402,8 +391,6 @@ const Dashboard = () => {
 
     setFetchedResults(obj);
   };
-
-  // console.log("Fetched", fetchedResults);
 
   return (
     <div className="flex flex-col justify-between bg-[#801fe1] items-center   min-h-screen w-full">

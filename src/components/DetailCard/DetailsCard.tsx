@@ -31,13 +31,15 @@ const DetailsCard = ({ details }: any) => {
       </div>
       <div className="flex flex-col  gap-1 p-2">
         <div>
-          <div className="flex gap-3 items-center">
-            <p className="text-lg font-semibold">Connector :</p>
-            <p className="">{details?.connectorType}</p>
+          <div className="md:flex gap-3 items-center">
+            <p className="text-lg font-semibold text-nowrap">Connector :</p>
+            <p className="text-gray-700">{details?.connectorType}</p>
           </div>
-          <div className="flex gap-3">
-            <p className="text-lg font-semibold">Is App Chain :</p>
-            <p>{details?.isAppChain ? "True" : "False"}</p>
+          <div className="md:flex gap-3">
+            <p className="text-lg text-nowrap font-semibold">Is App Chain :</p>
+            <p className="text-gray-700">
+              {details?.isAppChain ? "True" : "False"}
+            </p>
           </div>
         </div>
         <Divider />
@@ -54,7 +56,7 @@ const DetailsCard = ({ details }: any) => {
               {details?.Result?.LockOrMint?.currentLimit} {details?.token}
             </p>
           </div>
-          <div className="md:flex md:gap-3 text-nowrap">
+          <div className="lg:flex md:gap-3 text-nowrap">
             <p className="font-bold ">Max limit :</p>
             <p className="text-gray-700">
               {details?.Result?.LockOrMint?.maxLimit} {details?.token}
