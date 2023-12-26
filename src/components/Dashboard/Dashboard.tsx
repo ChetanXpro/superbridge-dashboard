@@ -523,7 +523,7 @@ const Dashboard = () => {
             )}
           </div>
         ) : (
-          <div className=" flex bg-green-300">
+          <div className=" flex ">
             <Spin tip="Loading" size="large" className="" />
           </div>
         )}
