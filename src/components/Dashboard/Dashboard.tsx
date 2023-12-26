@@ -6,10 +6,10 @@ import {
   Tokens,
   ProjectAddresses,
 } from "@socket.tech/socket-plugs";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { ChainId } from "@socket.tech/dl-core";
 
-import { Button, Select, Spin } from "antd";
+import { Button, Empty, Select, Spin } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
 import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
@@ -406,20 +406,20 @@ const Dashboard = () => {
   // console.log("Fetched", fetchedResults);
 
   return (
-    <div className="flex flex-col bg-black items-center   min-h-screen w-full">
-      <div className="flex flex-col   pb-10 w-full items-center ">
-        <div className="bg-[#801fe1] md:h-[19rem]   w-full items-center md:items-start   flex flex-col justify-between rounded-b-3xl">
+    <div className="flex flex-col justify-between bg-[#801fe1] items-center   min-h-screen w-full">
+      <div className="flex flex-col    w-full items-center ">
+        <div className="    w-full items-center md:items-start   flex flex-col justify-between rounded-b-3xl">
           <div className=" p-3">
             <img src="/socket-white-logo.png" width={150} height={150} />
           </div>
 
-          <div className="  flex justify-between flex-col   lg:flex-row w-full pl-1  items-center flex-1">
+          <div className="  flex justify-between flex-col w-full   pl-1  items-center flex-1">
             <div className="">
-              <h1 className=" text-3xl md:text-6xl text-nowrap mb-4">
+              <h1 className=" text-3xl md:text-6xl text-white text-nowrap mb-4">
                 Superbridge Dashboard
               </h1>
             </div>
-            <div className=" h-full flex  flex-col w-full  justify-center  items-center bg-[#EEEEEE]  p-3 mr-1 rounded-2xl mb-6 md:mx-10">
+            <div className="  flex  flex-col w-full  md:w-[50%] h-[13rem]  justify-center  items-center bg-[#EEEEEE]  p-3 mr-1 rounded-2xl mb-6 md:mx-10">
               <div className="gap-3 flex flex-col items-center     ">
                 <div className=" flex  gap-2   rounded-lg    w-full justify-center items-center  h-full ">
                   <div className=" ">
@@ -499,10 +499,10 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <section className=" gap-6  flex-1 justify-center flex items-center  w-full">
+      <section className=" gap-6   flex-1 justify-center flex items-center   w-full">
         {!isFetchingLimits ? (
-          <div className="flex flex-wrap gap-3 p-2    justify-center md:p-10">
-            {fetchedResults &&
+          <div className="flex flex-wrap gap-3 p-2  w-full    justify-center md:p-10">
+            {Object.keys(fetchedResults).length > 0 ? (
               Object.keys(fetchedResults).map((token: any, index) => (
                 <div
                   key={index}
@@ -515,10 +515,15 @@ const Dashboard = () => {
                     ))}
                   </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              <div className="h-full text-white  w-full flex-1 ">
+                <Empty />
+              </div>
+            )}
           </div>
         ) : (
-          <div className="">
+          <div className=" flex bg-green-300">
             <Spin tip="Loading" size="large" className="" />
           </div>
         )}
