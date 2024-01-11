@@ -393,42 +393,85 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex flex-col justify-between  items-center   min-h-screen w-full">
+    <div className="flex flex-col justify-between   items-center   min-h-screen w-full">
       <div className="text-white w-full px-4 py-6 sm:py-[62px] flex flex-col items-center justify-center text-center bg-[#7f1fff]">
-        <div className="relative flex flex-col mx-auto items-center max-w-[1280px]">
+        <div className="relative flex flex-col mx-auto items-center  max-w-[1280px] ">
           <h1 className="text-3xl md:text-4xl font-semibold">
-            Socket Explorer
+            Superbridge Dashboard
           </h1>
-          <p className="text-sm text-center sm:text-base max-w-[960px] sm:px-5 md:font-medium mb-6 mt-4 sm:mt-2">
-            Track all your bridge transactions across Ethereum, Optimism,
+          <p className="text-sm text-center sm:text-base max-w-[960px] sm:px-5 md:font-medium font-matterLight mb-6 mt-4 sm:mt-2">
+            Track all your bridge transactions limit across Ethereum, Optimism,
             Arbitrum, Polygon, Base, zkSync Era, Polygon zkEVM, BNB Chain,
             Avalanche, Gnosis Chain, Zora, Fantom, and Aurora.
           </p>
-          <div className="w-full mt-2 rounded-lg dark:border-[1px] border dark:border-tx-page border-opacity-50">
-            <div className="flex flex-row rounded-lg overflow-hidden">
-              <input
-                type="text"
-                className="w-full py-3 px-4 text-sm md:text-base bg-socket-base overflow-visible focus:outline-none text-socket-base rounded-none"
-                placeholder="Search by transaction hash or address"
-                value=""
-              />
-              <button className="flex items-center justify-center bg- text-black font-medium px-3 bg-socket-base">
-                <svg
-                  viewBox="0 0 31 31"
-                  fill="#717D8A"
-                  xmlns="http://www.w3.org/2000/svg"
-                  role="img"
-                  stroke="#717D8A"
-                  className="hover:fill-search-hover hover:stroke-search-hover h-5 md:h-6 undefined"
-                >
-                  <path d="m26.861 29.878.354.354.354-.354 1.81-1.81.353-.353-.353-.354-8.017-8.016A11.313 11.313 0 0 0 23.82 12.3C23.82 6.022 18.718.92 12.44.92 6.163.92 1.06 6.023 1.06 12.3c0 6.277 5.103 11.38 11.38 11.38 2.333 0 4.498-.713 6.302-1.92l8.12 8.118ZM12.441 3.2a9.09 9.09 0 0 1 9.1 9.1 9.09 9.09 0 0 1-9.1 9.1 9.09 9.09 0 0 1-9.1-9.1 9.09 9.09 0 0 1 9.1-9.1Z"></path>
-                </svg>
-              </button>
+          <div className="w-full mt-2 grid grid-cols-1 gap-1 md:grid-rows-2  rounded-lg max-w-[400px]     border-opacity-50">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+              <div className="flex items-start flex-col gap-2 rounded-lg">
+                <h1 className="text-base font-bold">Select mode</h1>
+                <Select
+                  size="large"
+                  className="w-full"
+                  defaultValue={DeploymentMode.PROD}
+                  onSelect={(e) => {
+                    handleModeChange(e);
+                  }}
+                  options={allDeploymentModes}
+                />
+              </div>
+
+              <div className="flex items-start flex-col gap-2">
+                <h1 className="text-base font-bold">Select Project</h1>
+                <Select
+                  className="w-full"
+                  size="large"
+                  showSearch
+                  placeholder="Select a project"
+                  optionFilterProp="children"
+                  onSelect={(e) => {
+                    getChains(e, selectedDeploymentMode);
+                  }}
+                  onChange={handleProjectChange}
+                  onSearch={onSearch}
+                  filterOption={filterOption}
+                  options={allProjects}
+                />
+              </div>
+            </div>
+            <div>
+              {chains.length > 0 && (
+                <div className="flex flex-col md:flex-row gap-4  w-full">
+                  <div className="flex items-start flex-col gap-2 w-full">
+                    <h1 className="text-base font-bold">Select Chain</h1>
+                    <Select
+                      size="large"
+                      placeholder="Select a Chain"
+                      value={selectedChain || chains[0]?.value}
+                      autoClearSearchValue={true}
+                      className="w-full"
+                      onChange={(e) => {
+                        setSelectedChain(e);
+                      }}
+                      options={chains}
+                    />
+                  </div>
+
+                  <div className="flex items-end w-full">
+                    <Button
+                      disabled={chains.length === 0}
+                      onClick={fetchLimits}
+                      size="large"
+                      className="w-full bg-black text-white border-black"
+                    >
+                      Fetch Limits
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-      <section className=" gap-6 bg-white  flex-1 justify-center flex items-center   w-full">
+      <section className=" gap-6 bg-[#F9FAFB]   flex-1 justify-center flex items-center   w-full">
         {!isFetchingLimits ? (
           <div className="flex flex-wrap gap-3 p-2  w-full    justify-center md:p-10">
             {Object.keys(fetchedResults).length > 0 ? (

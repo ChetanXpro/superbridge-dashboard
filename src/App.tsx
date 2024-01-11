@@ -4,17 +4,17 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import Navbar from "./components/Navbar";
 import { toast } from "react-hot-toast";
 import { checkIfWalletConnected } from "./helper/basicFunctions";
+import Footer from "./components/Footer";
 
 function App() {
   useEffect(() => {
     checkIfWalletConnected();
   }, []);
   return (
-    <div className=" min-h-screen w-full">
+    <div className="font-matterRegular min-h-screen w-full">
       <Navbar />
       <Dashboard />
-      {/* <Footer /> */}
-      <div className=" "></div>
+      <Footer />
     </div>
   );
 }
