@@ -8,7 +8,7 @@ import {
 } from "@socket.tech/socket-plugs";
 import toast from "react-hot-toast";
 import { ChainId } from "@socket.tech/dl-core";
-import { useContractWrite, UseContractWriteConfig } from "wagmi";
+
 import { Button, Empty, Select, Spin } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
@@ -21,7 +21,6 @@ import DetailsCard from "../DetailCard/DetailsCard";
 const Dashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
     useState<DeploymentMode>(DeploymentMode.PROD);
-
   const [selectedChain, setSelectedChain] = useState<any>();
 
   const [fetchedResults, setFetchedResults] = useState<any>({});
@@ -134,7 +133,6 @@ const Dashboard = () => {
       // );
 
       const provider = new ethers.JsonRpcProvider(rpcUrl);
-      const signer = provider.getSigner();
 
       const contract = new ethers.Contract(
         contractAddress,
@@ -393,42 +391,100 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex flex-col justify-between  items-center   min-h-screen w-full">
-      <div className="text-white w-full px-4 py-6 sm:py-[62px] flex flex-col items-center justify-center text-center bg-[#7f1fff]">
-        <div className="relative flex flex-col mx-auto items-center max-w-[1280px]">
-          <h1 className="text-3xl md:text-4xl font-semibold">
-            Socket Explorer
-          </h1>
-          <p className="text-sm text-center sm:text-base max-w-[960px] sm:px-5 md:font-medium mb-6 mt-4 sm:mt-2">
-            Track all your bridge transactions across Ethereum, Optimism,
-            Arbitrum, Polygon, Base, zkSync Era, Polygon zkEVM, BNB Chain,
-            Avalanche, Gnosis Chain, Zora, Fantom, and Aurora.
-          </p>
-          <div className="w-full mt-2 rounded-lg dark:border-[1px] border dark:border-tx-page border-opacity-50">
-            <div className="flex flex-row rounded-lg overflow-hidden">
-              <input
-                type="text"
-                className="w-full py-3 px-4 text-sm md:text-base bg-socket-base overflow-visible focus:outline-none text-socket-base rounded-none"
-                placeholder="Search by transaction hash or address"
-                value=""
-              />
-              <button className="flex items-center justify-center bg- text-black font-medium px-3 bg-socket-base">
-                <svg
-                  viewBox="0 0 31 31"
-                  fill="#717D8A"
-                  xmlns="http://www.w3.org/2000/svg"
-                  role="img"
-                  stroke="#717D8A"
-                  className="hover:fill-search-hover hover:stroke-search-hover h-5 md:h-6 undefined"
+    <div className="flex flex-col justify-between bg-[#801fe1] items-center   min-h-screen w-full">
+      <div className="flex flex-col    w-full items-center ">
+        <div className="    w-full items-center md:items-start   flex flex-col justify-between rounded-b-3xl">
+          <div className=" p-3">
+            <img src="/socket-white-logo.png" width={150} height={150} />
+          </div>
+
+          <div className="  flex justify-between flex-col w-full   pl-1  items-center flex-1">
+            <div className="">
+              <h1 className=" text-3xl md:text-6xl text-white text-nowrap mb-4">
+                Superbridge Dashboard
+              </h1>
+            </div>
+            <div className="  flex  flex-col w-full  md:w-[50%] h-[13rem]  justify-center  items-center bg-[#EEEEEE]  p-3 mr-1 rounded-2xl mb-6 md:mx-10">
+              <div className="gap-3 flex flex-col items-center     ">
+                <div className=" flex  gap-2   rounded-lg    w-full justify-center items-center  h-full ">
+                  <div className=" ">
+                    <h1 className="">Select mode</h1>
+                    <Select
+                      size="large"
+                      className="w-full"
+                      defaultValue={DeploymentMode.PROD}
+                      // style={{ width: 120 }}
+                      onSelect={(e) => {
+                        handleModeChange(e);
+                        // getChains(selectedProject!);
+                      }}
+                      options={allDeploymentModes}
+                    />
+                  </div>
+                  <div className="  w-[10rem]">
+                    <h1>Select Project</h1>
+                    <Select
+                      className="w-full"
+                      size="large"
+                      showSearch
+                      placeholder="Select a project"
+                      optionFilterProp="children"
+                      onSelect={(e: any) => {
+                        getChains(e, selectedDeploymentMode);
+                      }}
+                      // defaultValue={Project.AEVO}
+                      onChange={handleProjectChange}
+                      onSearch={onSearch}
+                      filterOption={filterOption}
+                      options={allProjects}
+                    />
+                  </div>
+                  {/* <div className="h-full flex flex-col   items-end justify-end">
+                  <Button className="w-full">Get Chain</Button>
+                </div> */}
+                </div>
+                {/* {chains.length > 0 && ( */}
+                <div
+                  className={` flex gap-1  flex-col md:flex-row     items-end w-full ${
+                    chains.length > 0 ? "block" : "hidden"
+                  } `}
                 >
-                  <path d="m26.861 29.878.354.354.354-.354 1.81-1.81.353-.353-.353-.354-8.017-8.016A11.313 11.313 0 0 0 23.82 12.3C23.82 6.022 18.718.92 12.44.92 6.163.92 1.06 6.023 1.06 12.3c0 6.277 5.103 11.38 11.38 11.38 2.333 0 4.498-.713 6.302-1.92l8.12 8.118ZM12.441 3.2a9.09 9.09 0 0 1 9.1 9.1 9.09 9.09 0 0 1-9.1 9.1 9.09 9.09 0 0 1-9.1-9.1 9.09 9.09 0 0 1 9.1-9.1Z"></path>
-                </svg>
-              </button>
+                  <div className=" w-full">
+                    <h1>Select Chain</h1>
+
+                    <Select
+                      size="large"
+                      placeholder="Select a Chain"
+                      // defaultValue={chains[0]?.value}
+                      value={selectedChain || chains[0]?.value}
+                      autoClearSearchValue={true}
+                      className=" w-full"
+                      // style={{ width: 120 }}
+                      onChange={(e) => {
+                        setSelectedChain(e);
+                      }}
+                      options={chains}
+                    />
+                  </div>
+
+                  <div className="h-full flex w-full  items-end">
+                    <Button
+                      disabled={chains.length === 0}
+                      onClick={fetchLimits}
+                      size="large"
+                      className="w-full"
+                    >
+                      Fetch Limits
+                    </Button>
+                  </div>
+                </div>
+                {/* )} */}
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <section className=" gap-6 bg-white  flex-1 justify-center flex items-center   w-full">
+      <section className=" gap-6   flex-1 justify-center flex items-center   w-full">
         {!isFetchingLimits ? (
           <div className="flex flex-wrap gap-3 p-2  w-full    justify-center md:p-10">
             {Object.keys(fetchedResults).length > 0 ? (
