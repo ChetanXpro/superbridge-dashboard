@@ -8,7 +8,7 @@ import {
 } from "@socket.tech/socket-plugs";
 import toast from "react-hot-toast";
 import { ChainId } from "@socket.tech/dl-core";
-import { useContractWrite, UseContractWriteConfig } from "wagmi";
+
 import { Button, Empty, Select, Spin } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
@@ -134,7 +134,6 @@ const Dashboard = () => {
       // );
 
       const provider = new ethers.JsonRpcProvider(rpcUrl);
-      const signer = provider.getSigner();
 
       const contract = new ethers.Contract(
         contractAddress,

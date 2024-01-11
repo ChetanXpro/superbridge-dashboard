@@ -1,5 +1,3 @@
-import React from "react";
-
 const Footer = () => {
   return (
     <footer className="hidden sm:flex w-full py-4 justify-between px-10  items-center flex-col md:flex-row text-[#667085] bg-[#F9FAFB]  ">
