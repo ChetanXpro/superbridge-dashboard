@@ -9,18 +9,23 @@ import {
 import toast from "react-hot-toast";
 import { ChainId } from "@socket.tech/dl-core";
 
-import { Button, Empty, Select, Spin } from "antd";
+import { Button, Empty, Input, Select, Spin } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
-import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
+import {
+  contractABI,
+  contractABI as nonAppChain,
+} from "../../contracts/ContractAbi";
 import { appChain } from "../../contracts/AppChain";
-import { RpcEnum, tokenDecimals } from "../../constants/consts";
+import { tokenDecimals } from "../../constants/consts";
 // import fetchEnumDefinitions from "../../helper/enum-service";
 import DetailsCard from "../DetailCard/DetailsCard";
 
 const Dashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
     useState<DeploymentMode>(DeploymentMode.PROD);
+  const [owner, setOwner] = useState<string>("");
+  const [rpcUrl, setRpcUrl] = useState<string>("");
 
   const [selectedChain, setSelectedChain] = useState<any>();
 
@@ -123,15 +128,6 @@ const Dashboard = () => {
   }) {
     try {
       setIsFetchingResults(true);
-      // console.log(
-      //   rpcUrl,
-      //   tokenDecimal,
-      //   functionToCall,
-      //   contractAddress,
-      //   connectorAddressList,
-      //   token,
-      //   contractABI
-      // );
 
       const provider = new ethers.JsonRpcProvider(rpcUrl);
 
@@ -293,7 +289,19 @@ const Dashboard = () => {
 
     const currentChain = ChainSlug[selectedChain as any];
 
-    if (!selectedChainsDetails) return;
+    if (!selectedChainsDetails) {
+      return toast.error("Please select a project", {
+        duration: 5000,
+        position: "top-right",
+      });
+    }
+
+    if (!rpcUrl) {
+      return toast.error("Please enter RPC Url", {
+        duration: 5000,
+        position: "top-right",
+      });
+    }
 
     console.log(selectedChainsDetails);
 
@@ -351,7 +359,7 @@ const Dashboard = () => {
 
     for (const token in currentChainData) {
       const currentDetails = currentChainData[token];
-      const rpcUrl = RpcEnum[Number(ChainSlug[selectedChain])];
+      // const rpcUrl = RpcEnum[Number(ChainSlug[selectedChain])];
       const tokenDecimal = tokenDecimals[token as Tokens];
       const functionToCall = whichFunctionToRun(currentDetails?.isAppChain);
       const connectorAddressList = currentDetails.connectors;
@@ -362,6 +370,18 @@ const Dashboard = () => {
       );
 
       const contractABI = currentDetails?.isAppChain ? appChain : nonAppChain;
+
+      // const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+      // const contract = new ethers.Contract(
+      //   currentDetails[contractAddress],
+      //   contractABI,
+      //   provider
+      // );
+
+      // const owner = await contract.owner();
+
+      // setOwner(owner);
 
       await callContractFunction({
         connectorAddressList,
@@ -403,7 +423,7 @@ const Dashboard = () => {
             Arbitrum, Polygon, Base, zkSync Era, Polygon zkEVM, BNB Chain,
             Avalanche, Gnosis Chain, Zora, Fantom, and Aurora.
           </p>
-          <div className="w-full mt-2 grid grid-cols-1 gap-1 md:grid-rows-2  rounded-lg max-w-[400px]     border-opacity-50">
+          <div className="w-full mt-2 grid grid-cols-1 gap-1 md:grid-rows-2 gap-2 rounded-lg max-w-[400px]     border-opacity-50">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               <div className="flex items-start flex-col gap-2 rounded-lg">
                 <h1 className="text-base font-bold">Select mode</h1>
@@ -436,6 +456,17 @@ const Dashboard = () => {
                 />
               </div>
             </div>
+            {chains.length > 0 && (
+              <div className=" flex flex-col items-start gap-2">
+                <h1 className="text-base font-bold">Rpc Url</h1>
+                <Input
+                  size="large"
+                  onChange={(e) => setRpcUrl(e.target.value)}
+                  value={rpcUrl}
+                  placeholder={`Enter RPC Url for ${selectedChain?.toLowerCase()} Chain`}
+                />
+              </div>
+            )}
             <div>
               {chains.length > 0 && (
                 <div className="flex flex-col md:flex-row gap-4  w-full">
@@ -467,6 +498,8 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
+
+            {/* {owner && `Owner: ${owner}`} */}
           </div>
         </div>
       </div>

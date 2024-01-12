@@ -10,6 +10,7 @@ function App() {
   useEffect(() => {
     checkIfWalletConnected();
   }, []);
+
   return (
     <div className="font-matterRegular min-h-screen w-full">
       <Navbar />
