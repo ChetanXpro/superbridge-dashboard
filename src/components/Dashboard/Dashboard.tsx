@@ -13,7 +13,7 @@ import { Button, Empty, Input, Select, Spin } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
 import {
-  contractABI,
+  // contractABI,
   contractABI as nonAppChain,
 } from "../../contracts/ContractAbi";
 import { appChain } from "../../contracts/AppChain";
@@ -24,7 +24,7 @@ import DetailsCard from "../DetailCard/DetailsCard";
 const Dashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
     useState<DeploymentMode>(DeploymentMode.PROD);
-  const [owner, setOwner] = useState<string>("");
+  // const [owner, setOwner] = useState<string>("");
   const [rpcUrl, setRpcUrl] = useState<string>("");
 
   const [selectedChain, setSelectedChain] = useState<any>();

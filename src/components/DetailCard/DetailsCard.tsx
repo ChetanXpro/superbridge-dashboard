@@ -56,7 +56,7 @@ const DetailsCard = ({ details }: any) => {
           </div>
         </div>
 
-        <Divider />
+        <Divider className="" />
 
         {/* Lock or Mint Limit */}
         {renderLimitSection(

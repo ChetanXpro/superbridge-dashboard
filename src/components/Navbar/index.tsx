@@ -41,7 +41,7 @@ const Navbar = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g clip-path="url(#clip0_401_9)">
+              <g clipPath="url(#clip0_401_9)">
                 <rect width="37" height="37" rx="1" fill="#1c1d28"></rect>
                 <g mask="url(#mask0_401_9)">
                   <path
@@ -69,7 +69,7 @@ const Navbar = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g clip-path="url(#clip0_401_9)">
+              <g clipPath="url(#clip0_401_9)">
                 <rect width="37" height="37" rx="1" fill="#fff"></rect>
                 <g mask="url(#mask0_401_9)">
                   <path
@@ -82,6 +82,7 @@ const Navbar = () => {
                   ></path>
                 </g>
               </g>
+
               <defs>
                 <clipPath id="clip0_401_9">
                   <rect width="38" height="38" rx="1" fill="#fff"></rect>
