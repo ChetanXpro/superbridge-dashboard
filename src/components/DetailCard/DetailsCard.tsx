@@ -1,8 +1,8 @@
-import { Button, Divider, Input } from "antd";
+import { Button, Divider } from "antd";
 import { convertTimestampToIndianDateTime } from "../../helper/basicFunctions";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import LimitUpdateModal from "../LimitUpdateModal";
-import { detailsForUpdate, userAddress } from "../../atoms/atoms";
+import { userAddress } from "../../atoms/atoms";
 import { useAtom } from "jotai";
 import { ethers } from "ethers";
 import { appChain } from "../../contracts/AppChain";
@@ -10,14 +10,14 @@ import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
 
 const DetailsCard = ({ details, owner, rpc }: any) => {
   console.log("DETAILS", details);
-  const updateDetails = useRef<any>({});
-  const [maxLimit, setMaxLimit] = useState(0);
-  const [perSecondRate, setPerSecondRate] = useState(0);
-  const [isMint, setIsMint] = useState(false);
+  // const updateDetails = useRef<any>({});
+  // const [maxLimit, setMaxLimit] = useState(0);
+  // const [perSecondRate, setPerSecondRate] = useState(0);
+  // const [, setIsMint] = useState(false);
   const [updateParams, setUpdateParams] = useState<any>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAddr] = useAtom(userAddress);
-  const [detailsForUpdates, setdetailsForUpdate] = useAtom(detailsForUpdate);
+  // const [detailsForUpdates, setdetailsForUpdate] = useAtom(detailsForUpdate);
   const renderLimitSection = (
     limitType: string,
     limitData: any,
@@ -93,7 +93,7 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
                   }
                 }
 
-                setIsMint(mintOrLock);
+                // setIsMint(mintOrLock);
                 setIsModalOpen(true);
               }}
               className="bg-black text-white"
@@ -191,9 +191,9 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
         <LimitUpdateModal
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
-          currentRpcUrl={rpc}
-          isAppChain={details?.isAppChain}
-          contractAddress={details?.contractAddress}
+          // currentRpcUrl={rpc}
+          // isAppChain={details?.isAppChain}
+          // contractAddress={details?.contractAddress}
           updateParams={updateParams}
           token={details?.token}
           onConfirm={() => {

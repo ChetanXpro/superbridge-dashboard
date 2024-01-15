@@ -1,27 +1,19 @@
 import { Input, Modal } from "antd";
-import { useAtom } from "jotai";
+
 import { useEffect, useState } from "react";
-import { detailsForUpdate } from "../../atoms/atoms";
-import { Utils } from "alchemy-sdk";
-import { tokenDecimals } from "../../constants/consts";
-import { ethers } from "ethers";
 
 const LimitUpdateModal = ({
   isModalOpen,
   setIsModalOpen,
   onConfirm,
-  currentRpcUrl,
-  isAppChain,
-  contractAddress,
+
   updateParams,
   token,
 }: {
   isModalOpen: boolean;
   setIsModalOpen: (value: boolean) => void;
   onConfirm: () => void;
-  currentRpcUrl: string;
-  isAppChain: boolean;
-  contractAddress: string;
+
   updateParams: any;
   token: string;
 }) => {
@@ -36,9 +28,9 @@ const LimitUpdateModal = ({
     updateParams.ratePerSecond && updateParams.ratePerSecond
   );
 
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
+  // const showModal = () => {
+  //   setIsModalOpen(true);
+  // };
 
   const handleOk = () => {
     onConfirm();

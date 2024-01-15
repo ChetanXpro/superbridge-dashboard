@@ -11,7 +11,7 @@ import { ChainId } from "@socket.tech/dl-core";
 
 import { Button, Empty, Input, Select, Spin } from "antd";
 import { ethers } from "ethers";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   // contractABI,
   contractABI as nonAppChain,
@@ -20,10 +20,6 @@ import { appChain } from "../../contracts/AppChain";
 import { tokenDecimals, RpcEnum } from "../../constants/consts";
 // import fetchEnumDefinitions from "../../helper/enum-service";
 import DetailsCard from "../DetailCard/DetailsCard";
-import LimitUpdateModal from "../LimitUpdateModal";
-import { convertTimestampToIndianDateTime } from "../../helper/basicFunctions";
-import { useAtom } from "jotai";
-import { userAddress } from "../../atoms/atoms";
 
 const Dashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
