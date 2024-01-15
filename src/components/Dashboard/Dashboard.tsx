@@ -11,21 +11,24 @@ import { ChainId } from "@socket.tech/dl-core";
 
 import { Button, Empty, Input, Select, Spin } from "antd";
 import { ethers } from "ethers";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   // contractABI,
   contractABI as nonAppChain,
 } from "../../contracts/ContractAbi";
 import { appChain } from "../../contracts/AppChain";
-import { tokenDecimals } from "../../constants/consts";
+import { tokenDecimals, RpcEnum } from "../../constants/consts";
 // import fetchEnumDefinitions from "../../helper/enum-service";
 import DetailsCard from "../DetailCard/DetailsCard";
+import LimitUpdateModal from "../LimitUpdateModal";
+import { convertTimestampToIndianDateTime } from "../../helper/basicFunctions";
+import { useAtom } from "jotai";
+import { userAddress } from "../../atoms/atoms";
 
 const Dashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
     useState<DeploymentMode>(DeploymentMode.PROD);
-  // const [owner, setOwner] = useState<string>("");
-  const [rpcUrl, setRpcUrl] = useState<string>("");
+  const [tokenOwner, setTokenOwner] = useState<any>({});
 
   const [selectedChain, setSelectedChain] = useState<any>();
 
@@ -34,6 +37,12 @@ const Dashboard = () => {
   const [isFetchingLimits, setIsFetchingResults] = useState(false);
   const [chains, setChains] = useState([]) as any;
   const [selectedChainsDetails, setSelectedChainsDetails] = useState<any>();
+  const [changeRpcUrl, setChangeRpcUrl] = useState<boolean>(false);
+
+  const [rpcUrl, setRpcUrl] = useState<string>(
+    RpcEnum[Number(ChainSlug[selectedChain])]
+  );
+
   const handleModeChange = (e: any) => {
     const mode = e;
     setSelectedDeploymentMode(mode);
@@ -90,6 +99,23 @@ const Dashboard = () => {
         });
       });
       setSelectedChain(ChainSlug[Object.keys(addresses)[0] as any]);
+      console.log(
+        "Selected Chain",
+        ChainSlug[Object.keys(addresses)[0] as any]
+      );
+
+      console.log(
+        "RPC here",
+        RpcEnum[
+          Number(ChainSlug[ChainSlug[Object.keys(addresses)[0] as any] as any])
+        ]
+      );
+
+      setRpcUrl(
+        RpcEnum[
+          Number(ChainSlug[ChainSlug[Object.keys(addresses)[0] as any] as any])
+        ]
+      );
 
       setSelectedChainsDetails(addresses as ProjectAddresses);
     } catch (error) {
@@ -111,7 +137,8 @@ const Dashboard = () => {
     token,
     contractABI,
     isAppChain,
-  }: {
+  }: // owner,
+  {
     rpcUrl: string;
     tokenDecimal: number;
     functionToCall: {
@@ -159,7 +186,7 @@ const Dashboard = () => {
                 } else if (index === 1) {
                   obj["ratePerSecond"] = Number(
                     ethers.formatUnits(value, tokenDecimal)
-                  ).toFixed(2);
+                  ).toFixed(4);
                 } else if (index === 2) {
                   const maxLimit =
                     BigInt(value) > maxValue ? value : BigInt(value);
@@ -190,26 +217,6 @@ const Dashboard = () => {
               console.log("Error in Result construct", error);
             }
           };
-
-          // console.log(
-          //   "resultParamsForLockOrMint",
-          //   functionToCall.paramsForLockOrMint,
-          //   "RPC",
-          //   rpcUrl
-          // );
-          // console.log(
-          //   "resultParamsForUnlockOrBurn",
-          //   functionToCall.paramsForUnlockOrBurn
-          // );
-          // console.log(
-          //   "getCurrentLockOrMintLimit",
-          //   functionToCall.getCurrentLockOrMintLimit
-          // );
-
-          // console.log(
-          //   "getCurrentBurnOrUnlockLimit",
-          //   functionToCall.getCurrentBurnOrUnlockLimit
-          // );
 
           const resultParamsForLockOrMint = await contract[
             functionToCall.paramsForLockOrMint
@@ -250,6 +257,8 @@ const Dashboard = () => {
             isAppChain,
             connectorType: curr,
             connectorAddr: currentConnector[curr],
+            contractAddress,
+
             Result: {
               LockOrMint: lockOrMintLimitObject,
               UnlockOrBurn: unlockOrBurnLimitObject,
@@ -264,7 +273,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error calling contract function:", error);
     } finally {
-      setIsFetchingResults(false);
     }
   }
 
@@ -283,6 +291,8 @@ const Dashboard = () => {
   const onSearch = (value: string) => {
     console.log("search:", value);
   };
+
+  console.log("Loading state", isFetchingLimits);
 
   const fetchLimits = async () => {
     // console.log(selectedChainsDetails);
@@ -357,7 +367,9 @@ const Dashboard = () => {
       }
     };
 
+    let owners: any = {};
     for (const token in currentChainData) {
+      // setOwner(owner);
       const currentDetails = currentChainData[token];
       // const rpcUrl = RpcEnum[Number(ChainSlug[selectedChain])];
       const tokenDecimal = tokenDecimals[token as Tokens];
@@ -371,17 +383,19 @@ const Dashboard = () => {
 
       const contractABI = currentDetails?.isAppChain ? appChain : nonAppChain;
 
-      // const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      console.log("Current Details ->", currentDetails[contractAddress]);
+      console.log("Current addr ->", contractAddress);
 
-      // const contract = new ethers.Contract(
-      //   currentDetails[contractAddress],
-      //   contractABI,
-      //   provider
-      // );
+      const contract = new ethers.Contract(
+        currentDetails[contractAddress],
+        contractABI,
+        provider
+      );
 
-      // const owner = await contract.owner();
+      const owner = await contract.owner();
 
-      // setOwner(owner);
+      owners[token] = owner;
 
       await callContractFunction({
         connectorAddressList,
@@ -392,10 +406,13 @@ const Dashboard = () => {
         token,
         contractABI,
         isAppChain: currentDetails?.isAppChain,
+        // owner,
       });
     }
 
+    setIsFetchingResults(false);
     let obj: any = {};
+    setTokenOwner(owners);
 
     collect.forEach((element: any) => {
       if (obj[element?.token]) {
@@ -410,6 +427,7 @@ const Dashboard = () => {
 
     setFetchedResults(obj);
   };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col justify-between   items-center   min-h-screen w-full">
@@ -423,7 +441,7 @@ const Dashboard = () => {
             Arbitrum, Polygon, Base, zkSync Era, Polygon zkEVM, BNB Chain,
             Avalanche, Gnosis Chain, Zora, Fantom, and Aurora.
           </p>
-          <div className="w-full mt-2 grid grid-cols-1 gap-1 md:grid-rows-2 gap-2 rounded-lg max-w-[400px]     border-opacity-50">
+          <div className="w-full mt-2 grid grid-cols-1  md:grid-rows-2 gap-4 rounded-lg max-w-[400px]     border-opacity-50">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               <div className="flex items-start flex-col gap-2 rounded-lg">
                 <h1 className="text-base font-bold">Select mode</h1>
@@ -456,17 +474,7 @@ const Dashboard = () => {
                 />
               </div>
             </div>
-            {chains.length > 0 && (
-              <div className=" flex flex-col items-start gap-2">
-                <h1 className="text-base font-bold">Rpc Url</h1>
-                <Input
-                  size="large"
-                  onChange={(e) => setRpcUrl(e.target.value)}
-                  value={rpcUrl}
-                  placeholder={`Enter RPC Url for ${selectedChain?.toLowerCase()} Chain`}
-                />
-              </div>
-            )}
+
             <div>
               {chains.length > 0 && (
                 <div className="flex flex-col md:flex-row gap-4  w-full">
@@ -480,6 +488,7 @@ const Dashboard = () => {
                       className="w-full"
                       onChange={(e) => {
                         setSelectedChain(e);
+                        setRpcUrl(RpcEnum[Number(ChainSlug[e])]);
                       }}
                       options={chains}
                     />
@@ -499,23 +508,61 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* {owner && `Owner: ${owner}`} */}
+            {changeRpcUrl && (
+              <div className=" flex flex-col items-start gap-2">
+                <h1 className="text-base font-bold">Rpc Url</h1>
+                <Input
+                  size="large"
+                  onChange={(e) => setRpcUrl(e.target.value)}
+                  value={rpcUrl}
+                  placeholder={`Enter RPC Url for ${selectedChain?.toLowerCase()} Chain`}
+                />
+              </div>
+            )}
+            {!changeRpcUrl && chains.length > 0 && (
+              <div
+                onClick={() => setChangeRpcUrl(true)}
+                className="flex ml-1 items-end w-full"
+              >
+                <p className="text-sm cursor-pointer">Change RPC ?</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      <section className=" gap-6 bg-[#F9FAFB]   flex-1 justify-center flex items-center   w-full">
+      <section className=" gap-6 bg-gray-100   flex-1 justify-center flex items-center   w-full">
         {!isFetchingLimits ? (
           <div className="flex flex-wrap gap-3 p-2  w-full    justify-center md:p-10">
             {Object.keys(fetchedResults).length > 0 ? (
               Object.keys(fetchedResults).map((token: any, index) => (
                 <div
                   key={index}
-                  className="bg-blue-300  rounded-lg w-full md:w-auto flex flex-col items-center p-2 md:p-10 gap-10 "
+                  className="  rounded-lg bg-white w-full md:w-auto flex flex-col items-center p-2 md:p-10 gap-10 "
                 >
-                  <h1 className="text-2xl font-bold">{token}</h1>
+                  <div className="flex flex-col gap-1 items-center">
+                    <h1 className="text-2xl font-semibold">{token}</h1>
+                    <div className="flex flex-col gap-3">
+                      <div className="md:flex md:gap-3 flex gap-2 text-nowrap ">
+                        <p className="font-bold">Owner :</p>
+                        <p className="text-gray-700">
+                          {/* {tokenOwner[token] || "N/A"} */}
+                          {tokenOwner[token].slice(0, 6) +
+                            "..." +
+                            tokenOwner[token].slice(-4)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                   <div className="  flex flex-wrap   w-full justify-center gap-3 ">
                     {fetchedResults[token]?.map((item: any, index: any) => (
-                      <DetailsCard key={index} details={item} />
+                      <DetailsCard
+                        key={index}
+                        setIsModalOpen={setIsModalOpen}
+                        isModalOpen={isModalOpen}
+                        details={item}
+                        owner={tokenOwner[token]}
+                        rpc={rpcUrl}
+                      />
                     ))}
                   </div>
                 </div>
