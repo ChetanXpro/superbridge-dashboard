@@ -1,4 +1,4 @@
 
 # Limit dashboard
 
-- superbridge dashboard to show limits for different tokens
+- superbridge dashboard to show and update limits for different tokens
