@@ -34,7 +34,7 @@ const Dashboard = () => {
   const [chains, setChains] = useState([]) as any;
   const [selectedChainsDetails, setSelectedChainsDetails] = useState<any>();
   const [changeRpcUrl, setChangeRpcUrl] = useState<boolean>(false);
-
+  const [isTextCopied, setIsTextCopied] = useState<boolean>(false);
   const [rpcUrl, setRpcUrl] = useState<string>(
     RpcEnum[Number(ChainSlug[selectedChain])]
   );
@@ -150,8 +150,6 @@ const Dashboard = () => {
     isAppChain: boolean;
   }) {
     try {
-      setIsFetchingResults(true);
-
       const provider = new ethers.JsonRpcProvider(rpcUrl);
 
       const contract = new ethers.Contract(
@@ -382,7 +380,7 @@ const Dashboard = () => {
       const provider = new ethers.JsonRpcProvider(rpcUrl);
       console.log("Current Details ->", currentDetails[contractAddress]);
       console.log("Current addr ->", contractAddress);
-
+      setIsFetchingResults(true);
       const contract = new ethers.Contract(
         currentDetails[contractAddress],
         contractABI,
@@ -424,6 +422,17 @@ const Dashboard = () => {
     setFetchedResults(obj);
   };
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [copyTextIndex, setCopyTextIndex] = useState<number>(0);
+
+  const copyToClipboard = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setIsTextCopied(true);
+    setCopyTextIndex(index);
+
+    setTimeout(() => {
+      setIsTextCopied(false);
+    }, 2000);
+  };
 
   return (
     <div className="flex flex-col justify-between   items-center   min-h-screen w-full">
@@ -538,14 +547,73 @@ const Dashboard = () => {
                   <div className="flex flex-col gap-1 items-center">
                     <h1 className="text-2xl font-semibold">{token}</h1>
                     <div className="flex flex-col gap-3">
-                      <div className="md:flex md:gap-3 flex gap-2 text-nowrap ">
+                      <div className="md:flex  md:gap-3 flex gap-2 text-nowrap  items-center ">
                         <p className="font-bold">Owner :</p>
-                        <p className="text-gray-700">
-                          {/* {tokenOwner[token] || "N/A"} */}
-                          {tokenOwner[token].slice(0, 6) +
-                            "..." +
-                            tokenOwner[token].slice(-4)}
-                        </p>
+                        <div className="flex   gap-1 items-center">
+                          <p className="text-gray-700">
+                            {/* {tokenOwner[token] || "N/A"} */}
+                            {tokenOwner[token].slice(0, 6) +
+                              "..." +
+                              tokenOwner[token].slice(-4)}
+                          </p>
+                          {isTextCopied && copyTextIndex === index ? (
+                            <div className="cursor-pointer">
+                              <div className="flex items-center font-normal">
+                                <svg
+                                  width="17"
+                                  height="18"
+                                  viewBox="0 0 22 20"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  role="img"
+                                  className="mx-1"
+                                >
+                                  <g
+                                    clip-path="url(#copied_svg__a)"
+                                    stroke="#039855"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  >
+                                    <path d="M19.552 9.154V10a9.09 9.09 0 1 1-5.391-8.31"></path>
+                                    <path d="m20.461 1.818-10 10-2.727-2.727"></path>
+                                  </g>
+                                  <defs>
+                                    <clipPath id="copied_svg__a">
+                                      <path
+                                        fill="#fff"
+                                        transform="translate(.46)"
+                                        d="M0 0h20.909v20H0z"
+                                      ></path>
+                                    </clipPath>
+                                  </defs>
+                                </svg>
+                                <span className="text-socket-secondary text-sm hidden md:inline-block">
+                                  Copied
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() =>
+                                copyToClipboard(tokenOwner[token], index)
+                              }
+                              className="cursor-pointer"
+                            >
+                              <svg
+                                width="17"
+                                height="18"
+                                viewBox="0 0 25 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                role="img"
+                                className="mx-1 fill-[#717d8a] hover:fill-[#7f1fff]"
+                              >
+                                <path d="M4.46 2a2 2 0 0 0-2 2v13a1 1 0 0 0 2 0V4h13a1 1 0 0 0 0-2h-13Zm4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-12Zm0 2h12v12h-12V8Z"></path>
+                              </svg>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
