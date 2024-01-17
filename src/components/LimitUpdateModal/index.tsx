@@ -72,7 +72,7 @@ const LimitUpdateModal = ({
       >
         <div className="flex flex-col py-4 gap-3">
           <div className="flex  flex-col gap-2">
-            <p className="font-bold">Limit</p>
+            <p className="font-bold">Max Limit</p>
             <Input
               className="text-gray-700"
               placeholder="Enter Limit"
