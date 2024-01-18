@@ -29,7 +29,7 @@ export async function checkIfWalletConnected() {
       if (accounts.length) {
         return accounts[0];
       } else {
-        return false;
+        return "";
       }
     } catch (error) {
       console.log(error);
@@ -49,7 +49,7 @@ export const connectWallet = async () => {
         method: "eth_requestAccounts",
       });
       if (accounts) {
-        console.log(accounts[0]);
+        // console.log(accounts[0]);
         return accounts[0];
       }
     } catch (error) {
@@ -105,7 +105,7 @@ export async function switchToChain(
             // make first latter capital of a string
 
             const capitalizedString =
-              name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+              name.charAt(0)?.toUpperCase() + name.slice(1)?.toLowerCase();
             console.log("Capitalized String:", capitalizedString);
 
             await window.ethereum.request({

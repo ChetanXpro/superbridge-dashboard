@@ -11,17 +11,21 @@ const Navbar = () => {
   const [isWalletConnected, setIsWalletConnected] = React.useState(false);
   const [userAddr, setUserAddr] = useAtom(userAddress);
   useEffect(() => {
-    checkIfWalletConnected().then((address) => {
-      setIsWalletConnected(!!address);
-      setUserAddr(address);
-    });
+    checkIfWalletConnected()
+      .then((address) => {
+        setIsWalletConnected(!!address);
+        setUserAddr(address);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
   const handleWalletConnect = async () => {
     const address = await connectWallet();
     if (address) {
       setUserAddr(address);
       setIsWalletConnected(true);
-      localStorage.setItem;
+      // localStorage.setItem;
     }
   };
 

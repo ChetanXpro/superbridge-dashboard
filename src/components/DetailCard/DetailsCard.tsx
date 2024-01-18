@@ -27,6 +27,8 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAddr] = useAtom(userAddress);
 
+  console.log("User Address---", userAddr);
+
   const renderLimitSection = (
     limitType: string,
     limitData: any,
