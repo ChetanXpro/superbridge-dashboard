@@ -3,7 +3,7 @@ import {
   checkIfWalletConnected,
   connectWallet,
 } from "../../helper/basicFunctions";
-import { Button } from "antd";
+
 import { useAtom } from "jotai";
 import { userAddress } from "../../atoms/atoms";
 
@@ -121,9 +121,12 @@ const Navbar = () => {
             </button>
           </div>
         ) : (
-          <Button size="large" onClick={handleWalletConnect}>
-            Connect
-          </Button>
+          <button
+            className="flex font-semibold text-socket-table items-center text-sm ml-3 md:text-base bg-[#212429] border text-white   rounded-md md:rounded-lg py-2.5 px-3 cursor-pointer"
+            onClick={handleWalletConnect}
+          >
+            Connect Wallet
+          </button>
         )}
 
         {/* <button className="rounded-lg bg-[#F2F4F7]  px-2 py-2 md:px-2.5 md:py-1.5 ml-3 sm:hidden">

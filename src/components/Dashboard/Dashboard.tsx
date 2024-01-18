@@ -9,7 +9,7 @@ import {
 import toast from "react-hot-toast";
 import { ChainId } from "@socket.tech/dl-core";
 
-import { Button, Empty, Input, Select, Spin } from "antd";
+import { Empty, Input, Select } from "antd";
 import { ethers } from "ethers";
 import { useState } from "react";
 import {
@@ -312,32 +312,32 @@ const Dashboard = () => {
 
     const currentChainData = selectedChainsDetails[currentChain];
 
-    const dummy = {
-      USDC: {
-        isAppChain: true,
-        MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
-        ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
-        Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
-        connectors: {
-          "421614": {
-            FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
-          },
-          "11155420": {
-            FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
-          },
-        },
-      },
-      WETH: {
-        isAppChain: false,
-        NonMintableToken: "0x4200000000000000000000000000000000000006",
-        Vault: "0x5c7Dd6cb73d93879E94F20d103804C495A10aE7e",
-        connectors: {
-          "2999": {
-            FAST: "0xeCaa2435d99c4987876A0382F1661dBf539700C0",
-          },
-        },
-      },
-    };
+    // const dummy = {
+    //   USDC: {
+    //     isAppChain: true,
+    //     MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
+    //     ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
+    //     Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
+    //     connectors: {
+    //       "421614": {
+    //         FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
+    //       },
+    //       "11155420": {
+    //         FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
+    //       },
+    //     },
+    //   },
+    //   WETH: {
+    //     isAppChain: false,
+    //     NonMintableToken: "0x4200000000000000000000000000000000000006",
+    //     Vault: "0x5c7Dd6cb73d93879E94F20d103804C495A10aE7e",
+    //     connectors: {
+    //       "2999": {
+    //         FAST: "0xeCaa2435d99c4987876A0382F1661dBf539700C0",
+    //       },
+    //     },
+    //   },
+    // };
 
     // {
     //   "421614": {
@@ -527,14 +527,13 @@ const Dashboard = () => {
                   </div>
 
                   <div className="flex items-end w-full">
-                    <Button
-                      disabled={chains.length === 0}
+                    <button
                       onClick={fetchLimits}
-                      size="large"
-                      className="w-full bg-black text-white border-black"
+                      disabled={chains.length === 0}
+                      className="relative sm:py-2 hover:bg-gray-900  sm:px-[50px] py-2  sm:rounded-lg rounded-md bg-black text-white  text-sm sm:text-base disabled:bg-[#98a2b3] w-full"
                     >
                       Fetch Limits
-                    </Button>
+                    </button>
                   </div>
                 </div>
               )}
@@ -562,17 +561,19 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <section className=" gap-6 bg-gray-100   flex-1 justify-center flex items-center   w-full">
+      <section className=" gap-6 bg-[#F9FAFB]  flex-1 justify-center flex items-center   w-full">
         {!isFetchingLimits ? (
-          <div className="flex flex-wrap gap-3 p-2  w-full    justify-center md:p-10">
+          <div className="flex flex-wrap   gap-3 p-2  w-full    justify-center md:p-7">
             {Object.keys(fetchedResults).length > 0 ? (
               Object.keys(fetchedResults).map((token: any, index) => (
                 <div
                   key={index}
-                  className="  rounded-lg bg-white w-full md:w-auto flex flex-col items-center p-2 md:p-10 gap-10 "
+                  className="  rounded-lg bg-white  w-full md:w-auto flex flex-col items-center p-2 md:p-10 gap-10 "
                 >
                   <div className="flex flex-col gap-1 items-center">
-                    <h1 className="text-2xl font-semibold">{token}</h1>
+                    <h1 className=" text-[#344054] text-xl sm:text-[28px] font-semibold flex items-center">
+                      {token}
+                    </h1>
                     <div className="flex flex-col gap-3">
                       <div className="md:flex  md:gap-3 flex gap-2 text-nowrap  items-center ">
                         <p className="font-bold">Owner :</p>
@@ -644,7 +645,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="  flex flex-wrap   w-full justify-center gap-3 ">
+                  <div className=" flex flex-wrap items-center justify-center gap-3 ">
                     {fetchedResults[token]?.map((item: any, index: any) => (
                       <DetailsCard
                         key={index}
@@ -659,8 +660,15 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              <div className="h-full text-white  w-full flex-1 ">
-                <Empty />
+              <div className="h-full text-black items-center justify-center   w-full flex-1 ">
+                <Empty
+                  rootClassName="text-red-300"
+                  description=""
+                  className="text-red-400"
+                />
+                <p className="text-center text-[#667085] font-medium sm:font-semibold sm:mt-3 mt-2 sm:text-base text-sm">
+                  No Limits To Show
+                </p>
               </div>
             )}
           </div>
