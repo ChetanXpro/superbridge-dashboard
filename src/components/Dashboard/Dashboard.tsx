@@ -20,6 +20,7 @@ import { appChain } from "../../contracts/AppChain";
 import { tokenDecimals, RpcEnum } from "../../constants/consts";
 // import fetchEnumDefinitions from "../../helper/enum-service";
 import DetailsCard from "../DetailCard/DetailsCard";
+import Loading from "../Loading";
 
 const Dashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
@@ -311,29 +312,56 @@ const Dashboard = () => {
 
     const currentChainData = selectedChainsDetails[currentChain];
 
-    // const dummy = {
-    //   USDC: {
-    //     isAppChain: false,
-    //     NonMintableToken: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
-    //     Vault: "0xFff4A34925301d231ddF42B871c3b199c1E80584",
-    //     connectors: {
-    //       "2999": {
-    //         FAST: "0x1812ff6bd726934f18159164e2927B34949B16a8",
-    //         SLOW: "0x1812ff6bd726934f18159164e2927B34949B16a8",
-    //       },
-    //     },
+    const dummy = {
+      USDC: {
+        isAppChain: true,
+        MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
+        ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
+        Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
+        connectors: {
+          "421614": {
+            FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
+          },
+          "11155420": {
+            FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
+          },
+        },
+      },
+      WETH: {
+        isAppChain: false,
+        NonMintableToken: "0x4200000000000000000000000000000000000006",
+        Vault: "0x5c7Dd6cb73d93879E94F20d103804C495A10aE7e",
+        connectors: {
+          "2999": {
+            FAST: "0xeCaa2435d99c4987876A0382F1661dBf539700C0",
+          },
+        },
+      },
+    };
+
+    // {
+    //   "421614": {
+    //     "USDC": {
+    //       "isAppChain": false
+    //     }
     //   },
-    //   WETH: {
-    //     isAppChain: false,
-    //     NonMintableToken: "0x4200000000000000000000000000000000000006",
-    //     Vault: "0x5c7Dd6cb73d93879E94F20d103804C495A10aE7e",
-    //     connectors: {
-    //       "2999": {
-    //         FAST: "0xeCaa2435d99c4987876A0382F1661dBf539700C0",
-    //       },
-    //     },
-    //   },
-    // };
+    //   "11155111": {
+    //     "USDC": {
+    //       "isAppChain": true,
+    //       "MintableToken": "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
+    //       "ExchangeRate": "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
+    //       "Controller": "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
+    //       "connectors": {
+    //         "421614": {
+    //           "FAST": "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e"
+    //         },
+    //         "11155420": {
+    //           "FAST": "0xb584D4bE1A5470CA1a8778E9B86c81e165204599"
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
     const whichFunctionToRun = (isAppChain: boolean) => {
       if (!isAppChain) {
@@ -436,15 +464,14 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col justify-between   items-center   min-h-screen w-full">
-      <div className="text-white w-full px-4 py-6 sm:py-[62px] flex flex-col items-center justify-center text-center bg-[#7f1fff]">
+      <div className="text-white w-full px-4  py-6  flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#9747ff] to-[#7f1fff]">
         <div className="relative flex flex-col mx-auto items-center  max-w-[1280px] ">
           <h1 className="text-3xl md:text-4xl font-semibold">
             Superbridge Dashboard
           </h1>
           <p className="text-sm text-center sm:text-base max-w-[960px] sm:px-5 md:font-medium font-matterLight mb-6 mt-4 sm:mt-2">
-            Track all your bridge transactions limit across Ethereum, Optimism,
-            Arbitrum, Polygon, Base, zkSync Era, Polygon zkEVM, BNB Chain,
-            Avalanche, Gnosis Chain, Zora, Fantom, and Aurora.
+            Track all your bridge transaction limits for all supported tokens
+            across your App chain and connected chains.
           </p>
           <div className="w-full mt-2 grid grid-cols-1  md:grid-rows-2 gap-4 rounded-lg max-w-[400px]     border-opacity-50">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
@@ -638,9 +665,10 @@ const Dashboard = () => {
             )}
           </div>
         ) : (
-          <div className=" flex ">
-            <Spin tip="Loading" size="large" className="" />
-          </div>
+          // <div className=" flex ">
+          //   <Spin tip="Loading" size="large" className="" />
+          // </div>
+          <Loading />
         )}
       </section>
     </div>

@@ -1,22 +1,23 @@
 import toast from "react-hot-toast";
+import { ethers } from "ethers";
 
 export function convertTimestampToIndianDateTime(timestamp: number): string {
   const options: Intl.DateTimeFormatOptions = {
     timeZone: "Asia/Kolkata",
     year: "numeric",
-    month: "numeric",
-    day: "numeric",
+    month: "2-digit",
+    day: "2-digit",
     hour: "numeric",
     minute: "numeric",
     hour12: true,
   };
 
-  const formattedDateTime: string = new Intl.DateTimeFormat(
-    "en-IN",
-    options
-  ).format(timestamp * 1000);
+  const formatter = new Intl.DateTimeFormat("en-IN", options);
+  const formattedDateTime: string = formatter.format(timestamp * 1000);
 
-  return formattedDateTime;
+  const result: string = `${formattedDateTime} UTC`;
+
+  return result;
 }
 
 export async function checkIfWalletConnected() {
@@ -61,3 +62,73 @@ export const connectWallet = async () => {
     });
   }
 };
+
+export async function checkChainId() {
+  try {
+    let userProvider = new ethers.BrowserProvider(window.ethereum);
+    let objectNetwork = await userProvider.getNetwork();
+    // returns a bigint
+    let chainId = parseInt(objectNetwork.chainId.toString());
+    const decimalChainId = parseInt(chainId.toString(), 16);
+    // console.log("Decimal Chain ID:", decimalChainId);
+    const hexChainId = decimalChainId.toString(16);
+    // console.log("Hexadecimal Chain ID:", hexChainId);
+    return hexChainId;
+  } catch (error) {
+    console.error("Error getting chain ID:", error);
+    return null;
+  }
+}
+
+export async function switchToChain(
+  targetChainId: number,
+  rpcUrl: string,
+  name: string
+) {
+  try {
+    const currentChainId = await checkChainId();
+    console.log("Current Chain ID:", currentChainId);
+    console.log("Target Chain ID:", targetChainId.toString());
+
+    if (currentChainId !== targetChainId.toString()) {
+      try {
+        // Request MetaMask to switch to the specified chain
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+        });
+
+        console.log(`Switched to chain ${targetChainId}`);
+      } catch (switchError: any) {
+        if (switchError.code === 4902) {
+          try {
+            // make first latter capital of a string
+
+            const capitalizedString =
+              name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+            console.log("Capitalized String:", capitalizedString);
+
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: `0x${targetChainId.toString(16)}`,
+                  chainName: capitalizedString,
+                  rpcUrls: [rpcUrl],
+                },
+              ],
+            });
+          } catch (addError) {
+            // handle "add" error
+            console.error("Error adding chain:", addError);
+          }
+        }
+      }
+    } else {
+      console.log("Already on target chain");
+    }
+  } catch (error) {
+    // Handle errors, such as the user rejecting the chain switch
+    console.error("Error switching chain:", error);
+  }
+}
