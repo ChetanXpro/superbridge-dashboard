@@ -241,10 +241,6 @@ const Dashboard = () => {
             getCurrentBurnOrUnlockLimit
           );
 
-          // console.log("LockOrMint", lockOrMintLimitObject);
-          // console.log("UnlockOrBurn", unlockOrBurnLimitObject);
-
-          // console.log("Result:", result);
           const obj = {
             token,
             source: selectedChain,
@@ -312,32 +308,32 @@ const Dashboard = () => {
 
     const currentChainData = selectedChainsDetails[currentChain];
 
-    // const dummy = {
-    //   USDC: {
-    //     isAppChain: true,
-    //     MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
-    //     ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
-    //     Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
-    //     connectors: {
-    //       "421614": {
-    //         FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
-    //       },
-    //       "11155420": {
-    //         FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
-    //       },
-    //     },
-    //   },
-    //   WETH: {
-    //     isAppChain: false,
-    //     NonMintableToken: "0x4200000000000000000000000000000000000006",
-    //     Vault: "0x5c7Dd6cb73d93879E94F20d103804C495A10aE7e",
-    //     connectors: {
-    //       "2999": {
-    //         FAST: "0xeCaa2435d99c4987876A0382F1661dBf539700C0",
-    //       },
-    //     },
-    //   },
-    // };
+    const dummy: any = {
+      USDC: {
+        isAppChain: true,
+        MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
+        ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
+        Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
+        connectors: {
+          "421614": {
+            FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
+          },
+          "11155420": {
+            FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
+          },
+        },
+      },
+      WETH: {
+        isAppChain: false,
+        NonMintableToken: "0x4200000000000000000000000000000000000006",
+        Vault: "0x5c7Dd6cb73d93879E94F20d103804C495A10aE7e",
+        connectors: {
+          "2999": {
+            FAST: "0xeCaa2435d99c4987876A0382F1661dBf539700C0",
+          },
+        },
+      },
+    };
 
     // {
     //   "421614": {
@@ -345,23 +341,6 @@ const Dashboard = () => {
     //       "isAppChain": false
     //     }
     //   },
-    //   "11155111": {
-    //     "USDC": {
-    //       "isAppChain": true,
-    //       "MintableToken": "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
-    //       "ExchangeRate": "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
-    //       "Controller": "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
-    //       "connectors": {
-    //         "421614": {
-    //           "FAST": "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e"
-    //         },
-    //         "11155420": {
-    //           "FAST": "0xb584D4bE1A5470CA1a8778E9B86c81e165204599"
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
 
     const whichFunctionToRun = (isAppChain: boolean) => {
       if (!isAppChain) {
@@ -389,10 +368,34 @@ const Dashboard = () => {
       }
     };
 
+    const data: any = {
+      // "11155111": {
+      USDC: {
+        isAppChain: true,
+        MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
+        ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
+        Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
+        connectors: {
+          "421614": {
+            FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
+          },
+          "11155420": {
+            FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
+          },
+        },
+      },
+      // },
+    };
+
     let owners: any = {};
-    for (const token in currentChainData) {
+    for (const token in data) {
       // setOwner(owner);
-      const currentDetails = currentChainData[token];
+      console.log("Token", token);
+
+      const currentDetails = data[token];
+
+      console.log("Current Details", currentDetails);
+
       // const rpcUrl = RpcEnum[Number(ChainSlug[selectedChain])];
       const tokenDecimal = tokenDecimals[token as Tokens];
       const functionToCall = whichFunctionToRun(currentDetails?.isAppChain);
@@ -405,7 +408,9 @@ const Dashboard = () => {
 
       const contractABI = currentDetails?.isAppChain ? appChain : nonAppChain;
 
-      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const provider = new ethers.JsonRpcProvider(
+        "https://ethereum-sepolia.publicnode.com"
+      );
       console.log("Current Details ->", currentDetails[contractAddress]);
       console.log("Current addr ->", contractAddress);
       setIsFetchingResults(true);
@@ -417,13 +422,15 @@ const Dashboard = () => {
 
       const owner = await contract.owner();
 
+      console.log("Owner", owner);
+
       owners[token] = owner;
 
       await callContractFunction({
         connectorAddressList,
         contractAddress: currentDetails[contractAddress],
         functionToCall,
-        rpcUrl,
+        rpcUrl: "https://ethereum-sepolia.publicnode.com",
         tokenDecimal,
         token,
         contractABI,

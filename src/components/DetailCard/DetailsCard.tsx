@@ -1,4 +1,4 @@
-import { Button, Divider } from "antd";
+import { Alert, Button, Divider, Tooltip } from "antd";
 import { ChainId } from "@socket.tech/dl-core";
 
 import {
@@ -11,24 +11,61 @@ import { userAddress } from "../../atoms/atoms";
 import { useAtom } from "jotai";
 import { ethers } from "ethers";
 import { appChain } from "../../contracts/AppChain";
+import { tokenDecimals } from "../../constants/consts";
+import { contractABI } from "../../contracts/ContractAbi";
 // import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
 
 const DetailsCard = ({ details, owner, rpc }: any) => {
-  // console.log("DETAILS", details);
-  // const updateDetails = useRef<any>({});
-  // const [maxLimit, setMaxLimit] = useState(0);
-  // const [perSecondRate, setPerSecondRate] = useState(0);
-  // const [, setIsMint] = useState(false);
+  const [txnHash, setTxnHash] = useState("");
+  const [isTxnSuccess, setIsTxnSuccess] = useState(false);
+  const [isTxnFailed, setIsTxnFailed] = useState(false);
+
   const [updateParams, setUpdateParams] = useState<any>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAddr] = useAtom(userAddress);
-  // const [detailsForUpdates, setdetailsForUpdate] = useAtom(detailsForUpdate);
+
   const renderLimitSection = (
     limitType: string,
     limitData: any,
     mintOrLock: boolean,
     isAppChain: boolean
   ) => {
+    const handleUpdateButton = () => {
+      console.log("Limit Data", limitData);
+
+      if (mintOrLock) {
+        if (!isAppChain) {
+          setUpdateParams({
+            mintLockOrBurnUnlock: "Lock",
+            maxLimit: limitData.maxLimit,
+            ratePerSecond: limitData.ratePerSecond,
+          });
+        } else {
+          setUpdateParams({
+            mintLockOrBurnUnlock: "Mint",
+            maxLimit: limitData.maxLimit,
+            ratePerSecond: limitData.ratePerSecond,
+          });
+        }
+      } else {
+        if (!isAppChain) {
+          setUpdateParams({
+            mintLockOrBurnUnlock: "Unlock",
+            maxLimit: limitData.maxLimit,
+            ratePerSecond: limitData.ratePerSecond,
+          });
+        } else {
+          setUpdateParams({
+            mintLockOrBurnUnlock: "Burn",
+            maxLimit: limitData.maxLimit,
+            ratePerSecond: limitData.ratePerSecond,
+          });
+        }
+      }
+
+      // setIsMint(mintOrLock);
+      setIsModalOpen(true);
+    };
     return (
       <div className="flex  flex-col gap-2" style={{ width: "300px" }}>
         <h1 className="mr-2 uppercase  text-normal font-matterMedium text-[#344054] ">
@@ -64,91 +101,113 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
             {convertTimestampToIndianDateTime(limitData.lastUpdateTimestamp)}
           </p>
         </div>
-        {userAddr && userAddr !== owner && (
-          <div>
-            <Button
-              onClick={() => {
-                console.log("Limit Data", limitData);
 
-                if (mintOrLock) {
-                  if (!isAppChain) {
-                    setUpdateParams({
-                      mintLockOrBurnUnlock: "Lock",
-                      maxLimit: limitData.maxLimit,
-                      ratePerSecond: limitData.ratePerSecond,
-                    });
-                  } else {
-                    setUpdateParams({
-                      mintLockOrBurnUnlock: "Mint",
-                      maxLimit: limitData.maxLimit,
-                      ratePerSecond: limitData.ratePerSecond,
-                    });
-                  }
-                } else {
-                  if (!isAppChain) {
-                    setUpdateParams({
-                      mintLockOrBurnUnlock: "Unlock",
-                      maxLimit: limitData.maxLimit,
-                      ratePerSecond: limitData.ratePerSecond,
-                    });
-                  } else {
-                    setUpdateParams({
-                      mintLockOrBurnUnlock: "Burn",
-                      maxLimit: limitData.maxLimit,
-                      ratePerSecond: limitData.ratePerSecond,
-                    });
-                  }
-                }
-
-                // setIsMint(mintOrLock);
-                setIsModalOpen(true);
+        <div className="flex flex-col  gap-1">
+          {userAddr?.toLowerCase() !== owner?.toLowerCase() ? (
+            <Tooltip
+              style={{
+                display:
+                  userAddr?.toLowerCase() === owner?.toLowerCase()
+                    ? "none"
+                    : "block",
               }}
+              placement="bottom"
+              title={
+                <span className="text-xs">
+                  Connect owner's wallet to update limits.
+                </span>
+              }
+            >
+              <Button
+                disabled={userAddr?.toLowerCase() !== owner?.toLowerCase()}
+                onClick={handleUpdateButton}
+                className="bg-black text-white"
+                size="middle"
+              >
+                Update {limitType}
+              </Button>
+            </Tooltip>
+          ) : (
+            <Button
+              disabled={userAddr?.toLowerCase() !== owner?.toLowerCase()}
+              onClick={handleUpdateButton}
               className="bg-black text-white"
               size="middle"
             >
               Update {limitType}
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     );
   };
 
   const updateLimit = async () => {
-    const CurrentChainId = ChainId[details?.source];
-    // console.log("Current", +CurrentChainId);
-    // return;
+    try {
+      if (!window?.ethereum) return;
+      // const CurrentChainId = ChainId[details?.source];
 
-    await switchToChain(+CurrentChainId, rpc, details?.source);
-    // console.log("UPDATE", currentRpcUrl, isAppChain, contractAddress);
-    // const contractABI = details?.isAppChain ? appChain : nonAppChain;
-    // const provider = new ethers.JsonRpcProvider(rpc);
-    const findOwner = async () => {
-      const provider = new ethers.JsonRpcProvider(
-        "https://ethereum-sepolia.publicnode.com"
-      );
+      // await switchToChain(+CurrentChainId, rpc, details?.source);
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
       const contract = new ethers.Contract(
         "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
         appChain,
-        provider
+        signer
       );
 
-      console.log("UpdateParama", updateParams);
+      let mintOrLock;
 
-      const owner = await contract.owner();
-      console.log("Owner", owner);
-    };
-    findOwner();
-    // const contract = new ethers.Contract(
-    //   details?.contractAddress,
-    //   contractABI,
-    //   provider
-    // );
-    // const constructParams;
+      if (updateParams.mintLockOrBurnUnlock === "Mint" || "Lock") {
+        mintOrLock = true;
+      } else if (updateParams.mintLockOrBurnUnlock === "Burn" || "Unlock") {
+        mintOrLock = false;
+      }
 
-    // const owner = await contract["updateLimitParams"]();
-    // console.log("MODAL OWNER", owner);
+      const currentTokenDecimal =
+        tokenDecimals[details?.token as keyof typeof tokenDecimals];
+      const maxLimitForContract = ethers.parseUnits(
+        maxLimit.toString(),
+        currentTokenDecimal
+      );
+      const ratePerSecondForContract = ethers.parseUnits(
+        perSecondRate.toString(),
+        currentTokenDecimal
+      );
+
+      const resultParamsForLockOrMint = await contract["updateLimitParams"]([
+        [
+          mintOrLock,
+          "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
+          maxLimitForContract,
+          ratePerSecondForContract,
+        ],
+      ]);
+
+      const { hash } = resultParamsForLockOrMint;
+      setTxnHash(hash);
+
+      console.log("Result Params", resultParamsForLockOrMint);
+      const res = await resultParamsForLockOrMint.wait();
+      console.log("RES", res);
+      if (res.status === 1) {
+        setIsTxnSuccess(true);
+      } else if (res.status === 0) {
+        setIsTxnFailed(false);
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.log("Error", error);
+    }
   };
+
+  const [maxLimit, setMaxLimit] = useState(
+    updateParams.maxLimit && parseFloat(updateParams.maxLimit)
+  );
+  const [perSecondRate, setPerSecondRate] = useState(
+    updateParams.ratePerSecond && updateParams.ratePerSecond
+  );
 
   return (
     <div className="flex  flex-1 border border-dashed    p-5 sm:flex md:flex flex-col  bg-white  rounded-t-lg  shadow-xl ">
@@ -223,9 +282,16 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
         <LimitUpdateModal
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
-          // currentRpcUrl={rpc}
-          // isAppChain={details?.isAppChain}
-          // contractAddress={details?.contractAddress}
+          maxLimit={maxLimit}
+          setMaxLimit={setMaxLimit}
+          perSecondRate={perSecondRate}
+          setPerSecondRate={setPerSecondRate}
+          txnHash={txnHash}
+          setTxnHash={setTxnHash}
+          isTxnSuccess={isTxnSuccess}
+          setIsTxnSuccess={setIsTxnSuccess}
+          isTxnFailed={isTxnFailed}
+          setIsTxnFailed={setIsTxnFailed}
           updateParams={updateParams}
           token={details?.token}
           onConfirm={() => {
