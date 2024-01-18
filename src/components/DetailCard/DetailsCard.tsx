@@ -16,7 +16,7 @@ import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
 
 // import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
 
-const DetailsCard = ({ details, owner, rpc }: any) => {
+const DetailsCard = ({ details, owner, rpc, fetchLimits }: any) => {
   console.log("Details", details);
 
   const [txnHash, setTxnHash] = useState("");
@@ -301,6 +301,7 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
           setIsTxnFailed={setIsTxnFailed}
           updateParams={updateParams}
           token={details?.token}
+          onCloseAndRefresh={fetchLimits}
           onConfirm={() => {
             updateLimit();
           }}

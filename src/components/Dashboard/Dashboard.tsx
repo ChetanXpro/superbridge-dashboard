@@ -599,6 +599,7 @@ const Dashboard = () => {
                         details={item}
                         owner={tokenOwner[token]}
                         rpc={rpcUrl}
+                        fetchLimits={fetchLimits}
                       />
                     ))}
                   </div>

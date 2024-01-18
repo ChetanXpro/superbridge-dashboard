@@ -19,6 +19,7 @@ const LimitUpdateModal = ({
   setIsTxnFailed,
   isTxnFailed,
   token,
+  onCloseAndRefresh,
   isTxnSuccess,
   setIsTxnSuccess,
 }: {
@@ -29,6 +30,7 @@ const LimitUpdateModal = ({
   txnHash: string;
   setIsTxnFailed: (value: boolean) => void;
   isTxnFailed: boolean;
+  onCloseAndRefresh: () => void;
   setTxnHash: (value: string) => void;
   maxLimit: number;
   isTxnSuccess: boolean;
@@ -44,6 +46,10 @@ const LimitUpdateModal = ({
   };
 
   const handleCancel = () => {
+    if (txnHash) {
+      onCloseAndRefresh();
+    }
+
     setIsModalOpen(false);
     setIsTxnFailed(false);
     setIsTxnSuccess(false);
@@ -79,7 +85,7 @@ const LimitUpdateModal = ({
         title={`Update ${updateParams.mintLockOrBurnUnlock} Limit`}
         className=""
         open={isModalOpen}
-        cancelText={txnHash ? "Close" : "Cancel"}
+        cancelText={txnHash ? "Close & Refresh" : "Cancel"}
         onOk={handleOk}
         okText="Update Limit"
         okType="primary"
