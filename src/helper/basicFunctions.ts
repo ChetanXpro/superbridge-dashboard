@@ -132,3 +132,29 @@ export async function switchToChain(
     console.error("Error switching chain:", error);
   }
 }
+
+export const whichFunctionsToCall = (isAppChain: boolean) => {
+  if (!isAppChain) {
+    return {
+      paramsForLockOrMint: "getLockLimitParams",
+      paramsForUnlockOrBurn: "getUnlockLimitParams",
+      getCurrentLockOrMintLimit: "getCurrentLockLimit",
+      getCurrentBurnOrUnlockLimit: "getCurrentUnlockLimit",
+    };
+  } else {
+    return {
+      paramsForLockOrMint: "getMintLimitParams",
+      paramsForUnlockOrBurn: "getBurnLimitParams",
+      getCurrentLockOrMintLimit: "getCurrentMintLimit",
+      getCurrentBurnOrUnlockLimit: "getCurrentBurnLimit",
+    };
+  }
+};
+
+export const whichContractToUse = (isAppChain: boolean) => {
+  if (!isAppChain) {
+    return "Vault";
+  } else {
+    return "Controller";
+  }
+};

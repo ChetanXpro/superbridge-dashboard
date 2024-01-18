@@ -1,12 +1,15 @@
 import { Input, Modal } from "antd";
 
 import { useEffect, useState } from "react";
+import { chainExplorerEnum } from "../../constants/consts";
+import { ChainSlug } from "@socket.tech/socket-plugs";
 
 const LimitUpdateModal = ({
   isModalOpen,
   setIsModalOpen,
   onConfirm,
   maxLimit,
+  chain,
   setMaxLimit,
   perSecondRate,
   setPerSecondRate,
@@ -22,6 +25,7 @@ const LimitUpdateModal = ({
   isModalOpen: boolean;
   setIsModalOpen: (value: boolean) => void;
   onConfirm: () => void;
+  chain: string;
   txnHash: string;
   setIsTxnFailed: (value: boolean) => void;
   isTxnFailed: boolean;
@@ -66,8 +70,6 @@ const LimitUpdateModal = ({
       console.log("Rate Limit", limit.toFixed(4));
 
       setPerSecondRate(limit.toFixed(4));
-
-      // console.log("TO SHOW", ethers.parseUnits(dev.toFixed(6).toString(), 6));
     }
   }, [maxLimit]);
 
@@ -77,10 +79,13 @@ const LimitUpdateModal = ({
         title={`Update ${updateParams.mintLockOrBurnUnlock} Limit`}
         className=""
         open={isModalOpen}
+        cancelText={txnHash ? "Close" : "Cancel"}
         onOk={handleOk}
+        okText="Update Limit"
+        okType="primary"
         onCancel={handleCancel}
         rootClassName=""
-        okButtonProps={{ className: "bg-blue-500" }}
+        okButtonProps={{ className: "bg-blue-500", disabled: !!txnHash }}
       >
         <div className="flex flex-col py-4 gap-3">
           <div className="flex  flex-col gap-2">
@@ -106,15 +111,19 @@ const LimitUpdateModal = ({
           {txnHash && (
             <div className="flex gap-1 items-center">
               <span className="font-bold">Transaction Hash :</span>
+
+              {txnHash.slice(0, 6) + "..." + txnHash.slice(-4)}
+
               <a
-                href={`https://rinkeby.etherscan.io/tx/${txnHash}`}
+                href={`${
+                  chainExplorerEnum[
+                    ChainSlug[chain as keyof typeof ChainSlug]
+                  ] || ""
+                }/${txnHash}`}
                 target="_blank"
                 className="text-blue-500"
                 rel="noreferrer"
               >
-                {txnHash.slice(0, 6) + "..." + txnHash.slice(-4)}
-              </a>
-              <a href="">
                 <svg
                   width="16"
                   height="17"
@@ -126,6 +135,7 @@ const LimitUpdateModal = ({
                   <path d="M3.333 2.105C2.605 2.105 2 2.71 2 3.44v9.333c0 .729.605 1.333 1.333 1.333h9.334c.728 0 1.333-.604 1.333-1.333V8.105h-1.333v4.667H3.333V3.44H8V2.105H3.333Zm6 0V3.44h2.391L5.529 9.634l.942.943 6.196-6.196v2.391H14V2.105H9.333Z"></path>
                 </svg>
               </a>
+
               {isTextCopied ? (
                 <div className="cursor-pointer">
                   <div className="flex items-center font-normal">

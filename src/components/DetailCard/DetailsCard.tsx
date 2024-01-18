@@ -1,4 +1,4 @@
-import { Alert, Button, Divider, Tooltip } from "antd";
+import { Button, Divider, Tooltip } from "antd";
 import { ChainId } from "@socket.tech/dl-core";
 
 import {
@@ -12,10 +12,13 @@ import { useAtom } from "jotai";
 import { ethers } from "ethers";
 import { appChain } from "../../contracts/AppChain";
 import { tokenDecimals } from "../../constants/consts";
-import { contractABI } from "../../contracts/ContractAbi";
+import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
+
 // import { contractABI as nonAppChain } from "../../contracts/ContractAbi";
 
 const DetailsCard = ({ details, owner, rpc }: any) => {
+  console.log("Details", details);
+
   const [txnHash, setTxnHash] = useState("");
   const [isTxnSuccess, setIsTxnSuccess] = useState(false);
   const [isTxnFailed, setIsTxnFailed] = useState(false);
@@ -128,14 +131,14 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
               </Button>
             </Tooltip>
           ) : (
-            <Button
+            <button
               disabled={userAddr?.toLowerCase() !== owner?.toLowerCase()}
               onClick={handleUpdateButton}
-              className="bg-black text-white"
-              size="middle"
+              className="bg-black w-48 py-1 px-3 rounded-md text-white"
+              // size="middle"
             >
               Update {limitType}
-            </Button>
+            </button>
           )}
         </div>
       </div>
@@ -145,15 +148,16 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
   const updateLimit = async () => {
     try {
       if (!window?.ethereum) return;
-      // const CurrentChainId = ChainId[details?.source];
+      const CurrentChainId = ChainId[details?.source];
 
-      // await switchToChain(+CurrentChainId, rpc, details?.source);
+      await switchToChain(+CurrentChainId, rpc, details?.source);
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
+      const contractABI = details?.isAppChain ? appChain : nonAppChain;
       const contract = new ethers.Contract(
-        "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
-        appChain,
+        details?.contractAddress,
+        contractABI,
         signer
       );
 
@@ -179,7 +183,7 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
       const resultParamsForLockOrMint = await contract["updateLimitParams"]([
         [
           mintOrLock,
-          "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
+          details?.connectorAddr,
           maxLimitForContract,
           ratePerSecondForContract,
         ],
@@ -188,15 +192,15 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
       const { hash } = resultParamsForLockOrMint;
       setTxnHash(hash);
 
-      console.log("Result Params", resultParamsForLockOrMint);
+      console.log("Txn Pending", resultParamsForLockOrMint);
       const res = await resultParamsForLockOrMint.wait();
-      console.log("RES", res);
+      console.log("Txn Done", res);
       if (res.status === 1) {
         setIsTxnSuccess(true);
       } else if (res.status === 0) {
         setIsTxnFailed(false);
       }
-      setIsModalOpen(false);
+      // setIsModalOpen(false);
     } catch (error) {
       console.log("Error", error);
     }
@@ -287,6 +291,7 @@ const DetailsCard = ({ details, owner, rpc }: any) => {
           perSecondRate={perSecondRate}
           setPerSecondRate={setPerSecondRate}
           txnHash={txnHash}
+          chain={details?.source}
           setTxnHash={setTxnHash}
           isTxnSuccess={isTxnSuccess}
           setIsTxnSuccess={setIsTxnSuccess}
