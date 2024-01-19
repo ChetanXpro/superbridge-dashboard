@@ -165,11 +165,22 @@ const DetailsCard = ({ details, owner, rpc, fetchLimits }: any) => {
 
       let mintOrLock;
 
-      if (updateParams.mintLockOrBurnUnlock === "Mint" || "Lock") {
+      if (
+        updateParams.mintLockOrBurnUnlock === "Mint" ||
+        updateParams.mintLockOrBurnUnlock === "Lock"
+      ) {
         mintOrLock = true;
-      } else if (updateParams.mintLockOrBurnUnlock === "Burn" || "Unlock") {
+      } else if (
+        updateParams.mintLockOrBurnUnlock === "Burn" ||
+        updateParams.mintLockOrBurnUnlock === "Unlock"
+      ) {
         mintOrLock = false;
       }
+      console.log("-----", updateParams);
+      console.log(
+        "-----",
+        updateParams.mintLockOrBurnUnlock === "Mint" || "Lock"
+      );
 
       const currentTokenDecimal =
         tokenDecimals[details?.token as keyof typeof tokenDecimals];
@@ -181,6 +192,15 @@ const DetailsCard = ({ details, owner, rpc, fetchLimits }: any) => {
         perSecondRate.toString(),
         currentTokenDecimal
       );
+
+      console.log(
+        mintOrLock,
+        details?.connectorAddr,
+        maxLimitForContract,
+        ratePerSecondForContract
+      );
+
+      // return;
 
       const resultParamsForLockOrMint = await contract["updateLimitParams"]([
         [

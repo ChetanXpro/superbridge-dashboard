@@ -619,9 +619,6 @@ const Dashboard = () => {
             )}
           </div>
         ) : (
-          // <div className=" flex ">
-          //   <Spin tip="Loading" size="large" className="" />
-          // </div>
           <Loading />
         )}
       </section>
