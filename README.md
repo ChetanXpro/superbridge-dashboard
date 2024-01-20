@@ -1,3 +1,3 @@
 
 # Limit dashboard
-superbridge dashboard to show and update limits for different tokens
+Track all your bridge transaction limits for all supported tokens across your App chain and connected chains.
