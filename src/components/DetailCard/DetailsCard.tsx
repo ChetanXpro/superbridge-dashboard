@@ -4,30 +4,7 @@ import LimitUpdateModal from "../LimitUpdateModal";
 
 import { RightArrowIcon } from "../Icons/Icons";
 import useDetailsCard from "../../hooks/useDetailsCard";
-
-interface LockOrMintUnlockOrBurn {
-  lastUpdateTimestamp: number;
-  ratePerSecond: number;
-  maxLimit: number;
-  lastUpdateLimit: number;
-  currentLimit: number;
-}
-
-interface Result {
-  LockOrMint: LockOrMintUnlockOrBurn;
-  UnlockOrBurn: LockOrMintUnlockOrBurn;
-}
-
-interface IDetails {
-  token: string;
-  source: string;
-  DestToken: string;
-  isAppChain: boolean;
-  connectorType: string;
-  connectorAddr: string;
-  contractAddress: string;
-  Result: Result;
-}
+import { IDetails } from "../../type/types";
 
 const DetailsCard = ({
   details,
@@ -61,6 +38,8 @@ const DetailsCard = ({
     rpc,
     details,
   });
+
+  // console.log("Update Params", updateParams);
 
   return (
     <div className="flex  flex-1 border border-dashed    p-5 sm:flex md:flex flex-col  bg-white  rounded-t-lg  shadow-xl ">

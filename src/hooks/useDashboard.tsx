@@ -23,7 +23,7 @@ const useDashboard = () => {
     useState<DeploymentMode>(DeploymentMode.PROD);
   const [tokenOwner, setTokenOwner] = useState<any>({});
 
-  const [selectedChain, setSelectedChain] = useState<any>("SEPOLIA");
+  const [selectedChain, setSelectedChain] = useState<any>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [copyTextIndex, setCopyTextIndex] = useState<number>(0);
 

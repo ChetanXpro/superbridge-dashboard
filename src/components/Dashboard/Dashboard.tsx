@@ -9,6 +9,7 @@ import Loading from "../Loading";
 
 import useDashboard from "../../hooks/useDashboard";
 import { CopyIcon, CorrectGreenIcon } from "../Icons/Icons";
+import { IDetails } from "../../type/types";
 
 const Dashboard = () => {
   const {
@@ -34,9 +35,7 @@ const Dashboard = () => {
     copyTextIndex,
     copyToClipboard,
     handleProjectChange,
-    isModalOpen,
 
-    setIsModalOpen,
     getChains,
     handleModeChange,
     fetchLimits,
@@ -145,7 +144,7 @@ const Dashboard = () => {
         {!isFetchingLimits ? (
           <div className="flex flex-wrap   gap-3 p-2  w-full    justify-center md:p-7">
             {Object.keys(fetchedResults).length > 0 ? (
-              Object.keys(fetchedResults).map((token: any, index) => (
+              Object.keys(fetchedResults).map((token: string, index) => (
                 <div
                   key={index}
                   className="  rounded-lg bg-white  w-full md:w-auto flex flex-col items-center p-2 md:p-10 gap-10 "
@@ -187,17 +186,17 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className=" flex flex-wrap items-center justify-center gap-3 ">
-                    {fetchedResults[token]?.map((item: any, index: any) => (
-                      <DetailsCard
-                        key={index}
-                        setIsModalOpen={setIsModalOpen}
-                        isModalOpen={isModalOpen}
-                        details={item}
-                        owner={tokenOwner[token]}
-                        rpc={rpcUrl}
-                        fetchLimits={fetchLimits}
-                      />
-                    ))}
+                    {fetchedResults[token]?.map(
+                      (item: IDetails, index: number) => (
+                        <DetailsCard
+                          key={index}
+                          details={item}
+                          owner={tokenOwner[token]}
+                          rpc={rpcUrl}
+                          fetchLimits={fetchLimits}
+                        />
+                      )
+                    )}
                   </div>
                 </div>
               ))
