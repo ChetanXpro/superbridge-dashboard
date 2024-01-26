@@ -18,24 +18,30 @@ import {
   whichContractToUse,
   whichFunctionsToCall,
 } from "../helper/basicFunctions";
+import { Chains, DynamicTokenAddresses, TokenData } from "../type/types";
 const useDashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
     useState<DeploymentMode>(DeploymentMode.PROD);
-  const [tokenOwner, setTokenOwner] = useState<any>({});
+  const [tokenOwner, setTokenOwner] = useState<DynamicTokenAddresses>({});
 
-  const [selectedChain, setSelectedChain] = useState<any>("");
+  const [selectedChain, setSelectedChain] = useState<string | undefined>("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [copyTextIndex, setCopyTextIndex] = useState<number>(0);
 
-  const [fetchedResults, setFetchedResults] = useState<any>({});
+  const [fetchedResults, setFetchedResults] = useState<TokenData>({});
   const [selectedProject, setSelectedProject] = useState<Project>();
   const [isFetchingLimits, setIsFetchingResults] = useState(false);
-  const [chains, setChains] = useState([]) as any;
+  const [chains, setChains] = useState<Chains[]>([]);
+
   const [selectedChainsDetails, setSelectedChainsDetails] = useState<any>();
+
+  console.log("Selected Chains Details", fetchedResults);
+
   const [changeRpcUrl, setChangeRpcUrl] = useState<boolean>(false);
   const [isTextCopied, setIsTextCopied] = useState<boolean>(false);
   const [rpcUrl, setRpcUrl] = useState<string>(
-    RpcEnum[Number(ChainSlug[selectedChain])]
+    RpcEnum[Number(ChainSlug[Number(selectedChain)])]
   );
 
   const filterOption = (
@@ -246,14 +252,14 @@ const useDashboard = () => {
       );
 
       setChains(() => {
-        return Object.keys(addresses).map((address: any) => {
+        return Object.keys(addresses).map((address: string) => {
           return {
-            label: ChainSlug[address],
-            value: ChainSlug[address],
+            label: ChainSlug[Number(address)],
+            value: ChainSlug[Number(address)],
           };
         });
       });
-      setSelectedChain(ChainSlug[Object.keys(addresses)[0] as any]);
+      setSelectedChain(ChainSlug[Number(Object.keys(addresses)[0])]);
 
       setRpcUrl(
         RpcEnum[
@@ -295,6 +301,7 @@ const useDashboard = () => {
     const currentChainData = selectedChainsDetails[currentChain];
 
     const owners: any = {};
+
     for (const token in currentChainData) {
       const currentDetails = currentChainData[token];
 
@@ -339,6 +346,7 @@ const useDashboard = () => {
 
     setIsFetchingResults(false);
     const obj: any = {};
+
     setTokenOwner(owners);
 
     collect.forEach((element: any) => {
