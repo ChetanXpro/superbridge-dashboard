@@ -67,7 +67,6 @@ export async function checkChainId() {
   try {
     let userProvider = new ethers.BrowserProvider(window.ethereum);
     let objectNetwork = await userProvider.getNetwork();
-    // returns a bigint
     let chainId = parseInt(objectNetwork.chainId.toString());
     const decimalChainId = parseInt(chainId.toString(), 16);
     // console.log("Decimal Chain ID:", decimalChainId);

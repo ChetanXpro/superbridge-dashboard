@@ -1,4 +1,4 @@
-export const appChain = [
+export const AppChainABI = [
   {
     inputs: [
       {

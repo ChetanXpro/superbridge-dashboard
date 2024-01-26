@@ -1,4 +1,4 @@
-export const contractABI = [
+export const NonAppChainABI = [
   {
     inputs: [{ internalType: "address", name: "token_", type: "address" }],
     stateMutability: "nonpayable",

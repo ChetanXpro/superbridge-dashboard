@@ -34,42 +34,7 @@
     src: url('./fonts/Matter-Black.ttf');
 }
 
-/* styles.css or your Tailwind CSS stylesheet */
-@layer base {
-    :root {
-        --socket-text-primary: #fff;
-        --socket-banner-primary: #9747ff;
-        --socket-banner-secondary: #7f1fff;
-        --socket-banner-hue: #964cf7;
-        --btn-text-success: #039855;
-        --btn-text-pending: #6711d7;
-        --btn-text-failure: red;
-        --btn-bg-success: #f6fef9;
-        --btn-bg-pending: #f9f5ff;
-        --btn-bg-failure: #f9f5ff;
-        --header-text: #717d8a;
-        --socket-header-bg: #9747ff;
-        --btn-bg: #fff;
-        --btn-search-primary: #717d8a;
-        --btn-search-hover: #7f1fff;
-        --bg-pagination: #9747ff;
-        --socket-background: #fff;
-        --socket-text: #000;
-        --socket-text-secondary: #667085;
-        --socket-text-ternary: #657795;
-        --bg-loader: #e5e5e5;
-        --border-color: #f2f4f7;
-        --table-header-bg: #f9fafb;
-        --text-table-color: #344054;
-        --btn-bg-pagination: #f9f5ff;
-        --btn-bg-pagination-hover: #7720e9;
-        --border-tx-page: #eaecf0;
-        --text-tx-page: #475467;
-        --socket-layer-1: #fff;
-        --socket-layer-2: #f9fafb;
-        -webkit-font-smoothing: antialiased;
-    
-    }
-      
-}
+
+
+
 

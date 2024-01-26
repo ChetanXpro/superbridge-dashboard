@@ -1,411 +1,47 @@
-import {
-  ChainSlug,
-  DeploymentMode,
-  Project,
-  getSuperBridgeAddresses,
-  Tokens,
-  ProjectAddresses,
-} from "@socket.tech/socket-plugs";
-import toast from "react-hot-toast";
-import { ChainId } from "@socket.tech/dl-core";
+import { ChainSlug, DeploymentMode } from "@socket.tech/socket-plugs";
 
 import { Empty, Input, Select } from "antd";
-import { ethers } from "ethers";
-import { useState } from "react";
-import {
-  // contractABI,
-  contractABI as nonAppChain,
-} from "../../contracts/ContractAbi";
-import { appChain } from "../../contracts/AppChain";
-import { tokenDecimals, RpcEnum } from "../../constants/consts";
-// import fetchEnumDefinitions from "../../helper/enum-service";
+
+import { RpcEnum } from "../../constants/consts";
+
 import DetailsCard from "../DetailCard/DetailsCard";
 import Loading from "../Loading";
-import {
-  whichContractToUse,
-  whichFunctionsToCall,
-} from "../../helper/basicFunctions";
+
+import useDashboard from "../../hooks/useDashboard";
+import { CopyIcon, CorrectGreenIcon } from "../Icons/Icons";
 
 const Dashboard = () => {
-  const [selectedDeploymentMode, setSelectedDeploymentMode] =
-    useState<DeploymentMode>(DeploymentMode.PROD);
-  const [tokenOwner, setTokenOwner] = useState<any>({});
+  const {
+    chains,
+    selectedChain,
+    setSelectedChain,
+    isFetchingLimits,
 
-  const [selectedChain, setSelectedChain] = useState<any>("SEPOLIA");
-
-  const [fetchedResults, setFetchedResults] = useState<any>({});
-  const [selectedProject, setSelectedProject] = useState<Project>();
-  const [isFetchingLimits, setIsFetchingResults] = useState(false);
-  const [chains, setChains] = useState([]) as any;
-  const [selectedChainsDetails, setSelectedChainsDetails] = useState<any>();
-  const [changeRpcUrl, setChangeRpcUrl] = useState<boolean>(false);
-  const [isTextCopied, setIsTextCopied] = useState<boolean>(false);
-  const [rpcUrl, setRpcUrl] = useState<string>(
-    RpcEnum[Number(ChainSlug[selectedChain])]
-  );
-
-  const handleModeChange = (e: any) => {
-    const mode = e;
-    setSelectedDeploymentMode(mode);
-    getChains(selectedProject!, e);
-  };
-
-  const allDeploymentModes = [
-    {
-      label: "Production",
-      value: DeploymentMode.PROD,
-    },
-
-    {
-      label: "Development",
-      value: DeploymentMode.DEV,
-    },
-    {
-      label: "Surge",
-      value: DeploymentMode.SURGE,
-    },
-  ];
-
-  const allProjects = Object.keys(Project).map((key) => {
-    return {
-      label: Project[key as keyof typeof Project],
-      value: Project[key as keyof typeof Project],
-    };
-  });
-
-  const getChains = async (project: string, mode: string) => {
-    // console.log(selectedDeploymentMode);
-    // console.log(selectedProject);
-    try {
-      if (!selectedDeploymentMode) return alert("Select All Fields");
-      console.log("Project", project);
-      console.log("Deployment", mode);
-
-      if (selectedDeploymentMode && !project) return;
-
-      setSelectedChain(undefined);
-      setSelectedProject(project as Project);
-
-      const addresses = await getSuperBridgeAddresses(
-        (mode as DeploymentMode) || DeploymentMode.PROD,
-        (project as Project) || Project.AEVO
-      );
-
-      setChains(() => {
-        return Object.keys(addresses).map((address: any) => {
-          return {
-            label: ChainSlug[address],
-            value: ChainSlug[address],
-          };
-        });
-      });
-      setSelectedChain(ChainSlug[Object.keys(addresses)[0] as any]);
-      console.log(
-        "Selected Chain",
-        ChainSlug[Object.keys(addresses)[0] as any]
-      );
-
-      console.log(
-        "RPC here",
-        RpcEnum[
-          Number(ChainSlug[ChainSlug[Object.keys(addresses)[0] as any] as any])
-        ]
-      );
-
-      setRpcUrl(
-        RpcEnum[
-          Number(ChainSlug[ChainSlug[Object.keys(addresses)[0] as any] as any])
-        ]
-      );
-
-      setSelectedChainsDetails(addresses as ProjectAddresses);
-    } catch (error) {
-      console.log(error);
-      toast.error(`Error fetching chains for Mode ${mode} Project ${project}`, {
-        duration: 5000,
-        position: "top-right",
-      });
-    }
-  };
-
-  let collect: any = [];
-  async function callContractFunction({
+    selectedDeploymentMode,
+    fetchedResults,
     rpcUrl,
-    tokenDecimal,
-    functionToCall,
-    contractAddress,
-    connectorAddressList,
-    token,
-    contractABI,
-    isAppChain,
-  }: // owner,
-  {
-    rpcUrl: string;
-    tokenDecimal: number;
-    functionToCall: {
-      paramsForLockOrMint: string;
-      paramsForUnlockOrBurn: string;
-      getCurrentLockOrMintLimit: string;
-      getCurrentBurnOrUnlockLimit: string;
-    };
-    contractAddress: string;
-    connectorAddressList: any;
-    token: string;
-    contractABI: any;
-    isAppChain: boolean;
-  }) {
-    try {
-      const provider = new ethers.JsonRpcProvider(rpcUrl);
+    setRpcUrl,
+    tokenOwner,
 
-      const contract = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        provider
-      );
+    isTextCopied,
 
-      let connectorsResultArr = [];
+    changeRpcUrl,
+    setChangeRpcUrl,
 
-      for (const connector in connectorAddressList) {
-        const currentConnector = connectorAddressList[connector];
+    allDeploymentModes,
+    allProjects,
 
-        for (const curr in currentConnector) {
-          const constructResult = (
-            tokenDecimal: number,
-            result: any,
-            currentLimit: any
-          ) => {
-            // console.log("DATA TO CONTRUCT", data);
-            try {
-              const maxValue = BigInt(Number.MAX_SAFE_INTEGER);
-              const obj: any = {};
-              Object.values(result).forEach((value: any, index: any) => {
-                if (index === 0) {
-                  // const date = new Date(Number(value) * 1000);
-                  obj["lastUpdateTimestamp"] = Number(value);
-                } else if (index === 1) {
-                  obj["ratePerSecond"] = Number(
-                    ethers.formatUnits(value, tokenDecimal)
-                  ).toFixed(4);
-                } else if (index === 2) {
-                  const maxLimit =
-                    BigInt(value) > maxValue ? value : BigInt(value);
-                  obj["maxLimit"] = Number(
-                    ethers.formatUnits(maxLimit, tokenDecimal)
-                  ).toFixed(2);
-                } else if (index === 3) {
-                  const lastUpdateLimit =
-                    BigInt(value) > maxValue ? value : BigInt(value);
-                  obj["lastUpdateLimit"] = Number(
-                    ethers.formatUnits(lastUpdateLimit, tokenDecimal)
-                  ).toFixed(2);
-                }
-              });
+    copyTextIndex,
+    copyToClipboard,
+    handleProjectChange,
+    isModalOpen,
 
-              // const currentLimit = calculateLimit(obj);
-              const currentLimitValue =
-                BigInt(currentLimit) > maxValue
-                  ? currentLimit
-                  : BigInt(currentLimit);
-
-              obj["currentLimit"] = Number(
-                ethers.formatUnits(currentLimitValue, tokenDecimal)
-              ).toFixed(2);
-
-              return obj;
-            } catch (error) {
-              console.log("Error in Result construct", error);
-            }
-          };
-
-          const resultParamsForLockOrMint = await contract[
-            functionToCall.paramsForLockOrMint
-          ](currentConnector[curr]);
-
-          const resultParamsForUnlockOrBurn = await contract[
-            functionToCall.paramsForUnlockOrBurn
-          ](currentConnector[curr]);
-
-          const getCurrentLockOrMintLimit = await contract[
-            functionToCall.getCurrentLockOrMintLimit
-          ](currentConnector[curr]);
-
-          const getCurrentBurnOrUnlockLimit = await contract[
-            functionToCall.getCurrentBurnOrUnlockLimit
-          ](currentConnector[curr]);
-
-          const lockOrMintLimitObject = constructResult(
-            tokenDecimal,
-            resultParamsForLockOrMint,
-            getCurrentLockOrMintLimit
-          );
-
-          const unlockOrBurnLimitObject = constructResult(
-            tokenDecimal,
-            resultParamsForUnlockOrBurn,
-            getCurrentBurnOrUnlockLimit
-          );
-
-          const obj = {
-            token,
-            source: selectedChain,
-            DestToken: ChainId[connector as any],
-            isAppChain,
-            connectorType: curr,
-            connectorAddr: currentConnector[curr],
-            contractAddress,
-
-            Result: {
-              LockOrMint: lockOrMintLimitObject,
-              UnlockOrBurn: unlockOrBurnLimitObject,
-            },
-          };
-
-          connectorsResultArr.push(obj);
-        }
-      }
-
-      collect.push(...connectorsResultArr);
-    } catch (error) {
-      console.error("Error calling contract function:", error);
-    } finally {
-    }
-  }
-
-  const handleProjectChange = (e: any) => {
-    // console.log(e);
-
-    setSelectedProject(e);
-    // getChains(selectedDeploymentMode, e);
-  };
-
-  const filterOption = (
-    input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "")?.toLowerCase().includes(input?.toLowerCase());
-
-  const onSearch = (value: string) => {
-    console.log("search:", value);
-  };
-
-  console.log("Loading state", isFetchingLimits);
-
-  const fetchLimits = async () => {
-    // console.log(selectedChainsDetails);
-
-    const currentChain = ChainSlug[selectedChain as any];
-
-    if (!selectedChainsDetails) {
-      return toast.error("Please select a project", {
-        duration: 5000,
-        position: "top-right",
-      });
-    }
-
-    if (!rpcUrl) {
-      return toast.error("Please enter RPC Url", {
-        duration: 5000,
-        position: "top-right",
-      });
-    }
-
-    console.log(selectedChainsDetails);
-
-    const currentChainData = selectedChainsDetails[currentChain];
-
-    // const dummyData: any = {
-    //   USDC: {
-    //     isAppChain: true,
-    //     MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
-    //     ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
-    //     Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
-    //     connectors: {
-    //       "421614": {
-    //         FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
-    //       },
-    //       "11155420": {
-    //         FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
-    //       },
-    //     },
-    //   },
-    // };
-
-    let owners: any = {};
-    for (const token in currentChainData) {
-      // setOwner(owner);
-      console.log("Token", token);
-
-      const currentDetails = currentChainData[token];
-
-      console.log("Current Details", currentDetails);
-
-      // const rpcUrl = RpcEnum[Number(ChainSlug[selectedChain])];
-      const tokenDecimal = tokenDecimals[token as Tokens];
-      const functionToCall = whichFunctionsToCall(currentDetails?.isAppChain);
-      const connectorAddressList = currentDetails.connectors;
-      // console.log("connectors", connectorAddressList);
-
-      const contractAddress = whichContractToUse(currentDetails?.isAppChain);
-
-      const contractABI = currentDetails?.isAppChain ? appChain : nonAppChain;
-
-      const provider = new ethers.JsonRpcProvider(rpcUrl);
-      console.log("Current Details ->", currentDetails[contractAddress]);
-      console.log("Current addr ->", contractAddress);
-      setIsFetchingResults(true);
-      const contract = new ethers.Contract(
-        currentDetails[contractAddress],
-        contractABI,
-        provider
-      );
-
-      const owner = await contract.owner();
-
-      console.log("Owner", owner);
-
-      owners[token] = owner;
-
-      await callContractFunction({
-        connectorAddressList,
-        contractAddress: currentDetails[contractAddress],
-        functionToCall,
-        rpcUrl,
-        tokenDecimal,
-        token,
-        contractABI,
-        isAppChain: currentDetails?.isAppChain,
-        // owner,
-      });
-    }
-
-    setIsFetchingResults(false);
-    let obj: any = {};
-    setTokenOwner(owners);
-
-    collect.forEach((element: any) => {
-      if (obj[element?.token]) {
-        obj[element.token].push(element);
-      } else {
-        obj[element?.token] = [];
-        obj[element?.token].push(element);
-      }
-    });
-
-    console.log("Hmmm", obj);
-
-    setFetchedResults(obj);
-  };
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [copyTextIndex, setCopyTextIndex] = useState<number>(0);
-
-  const copyToClipboard = (text: string, index: number) => {
-    navigator.clipboard.writeText(text);
-    setIsTextCopied(true);
-    setCopyTextIndex(index);
-
-    setTimeout(() => {
-      setIsTextCopied(false);
-    }, 2000);
-  };
+    setIsModalOpen,
+    getChains,
+    handleModeChange,
+    fetchLimits,
+    filterOption,
+  } = useDashboard();
 
   return (
     <div className="flex flex-col justify-between   items-center   min-h-screen w-full">
@@ -445,7 +81,6 @@ const Dashboard = () => {
                     getChains(e, selectedDeploymentMode);
                   }}
                   onChange={handleProjectChange}
-                  onSearch={onSearch}
                   filterOption={filterOption}
                   options={allProjects}
                 />
@@ -524,43 +159,14 @@ const Dashboard = () => {
                         <p className="font-bold">Owner :</p>
                         <div className="flex   gap-1 items-center">
                           <p className="text-gray-700">
-                            {/* {tokenOwner[token] || "N/A"} */}
-                            {tokenOwner[token].slice(0, 6) +
+                            {tokenOwner[token]?.slice(0, 6) +
                               "..." +
                               tokenOwner[token].slice(-4)}
                           </p>
                           {isTextCopied && copyTextIndex === index ? (
                             <div className="cursor-pointer">
                               <div className="flex items-center font-normal">
-                                <svg
-                                  width="17"
-                                  height="18"
-                                  viewBox="0 0 22 20"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  role="img"
-                                  className="mx-1"
-                                >
-                                  <g
-                                    clip-path="url(#copied_svg__a)"
-                                    stroke="#039855"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                  >
-                                    <path d="M19.552 9.154V10a9.09 9.09 0 1 1-5.391-8.31"></path>
-                                    <path d="m20.461 1.818-10 10-2.727-2.727"></path>
-                                  </g>
-                                  <defs>
-                                    <clipPath id="copied_svg__a">
-                                      <path
-                                        fill="#fff"
-                                        transform="translate(.46)"
-                                        d="M0 0h20.909v20H0z"
-                                      ></path>
-                                    </clipPath>
-                                  </defs>
-                                </svg>
+                                <CorrectGreenIcon />
                                 <span className="text-socket-secondary text-sm hidden md:inline-block">
                                   Copied
                                 </span>
@@ -573,17 +179,7 @@ const Dashboard = () => {
                               }
                               className="cursor-pointer"
                             >
-                              <svg
-                                width="17"
-                                height="18"
-                                viewBox="0 0 25 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                role="img"
-                                className="mx-1 fill-[#717d8a] hover:fill-[#7f1fff]"
-                              >
-                                <path d="M4.46 2a2 2 0 0 0-2 2v13a1 1 0 0 0 2 0V4h13a1 1 0 0 0 0-2h-13Zm4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-12Zm0 2h12v12h-12V8Z"></path>
-                              </svg>
+                              <CopyIcon />
                             </div>
                           )}
                         </div>
