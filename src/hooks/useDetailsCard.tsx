@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { userAddress } from "../atoms/atoms";
 import { useAtom } from "jotai";
 import { Button, Tooltip } from "antd";
