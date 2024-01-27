@@ -103,8 +103,6 @@ const useDashboard = () => {
     isAppChain: boolean;
   }) {
     try {
-      console.log("Connector Address List", connectorAddressList);
-
       const provider = new ethers.JsonRpcProvider(rpcUrl);
 
       const contract = new ethers.Contract(
@@ -309,8 +307,6 @@ const useDashboard = () => {
   };
 
   const fetchLimits = async () => {
-    // console.log(selectedChainsDetails);
-
     const currentChain = ChainSlug[selectedChain as keyof typeof ChainSlug];
 
     if (!selectedChainsDetails) {
@@ -327,31 +323,12 @@ const useDashboard = () => {
       });
     }
 
-    console.log(selectedChainsDetails);
-
     const currentChainData = selectedChainsDetails[currentChain];
 
     const owners: DynamicTokenAddresses = {};
 
-    const dummyData: any = {
-      USDC: {
-        isAppChain: true,
-        MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
-        ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
-        Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
-        connectors: {
-          "421614": {
-            FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
-          },
-          "11155420": {
-            FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
-          },
-        },
-      },
-    };
-
-    for (const token in dummyData) {
-      const currentDetails = dummyData[token];
+    for (const token in currentChainData) {
+      const currentDetails = currentChainData[token];
 
       const tokenDecimal = tokenDecimals[token as Tokens];
       const functionToCall = whichFunctionsToCall(currentDetails?.isAppChain);
@@ -364,8 +341,7 @@ const useDashboard = () => {
         : NonAppChainABI;
 
       const provider = new ethers.JsonRpcProvider(rpcUrl);
-      console.log("Current Details ->", currentDetails[contractAddress]);
-      console.log("Current addr ->", contractAddress);
+
       setIsFetchingResults(true);
       const contract = new ethers.Contract(
         currentDetails[contractAddress],
@@ -374,8 +350,6 @@ const useDashboard = () => {
       );
 
       const owner = await contract.owner();
-
-      console.log("Owner", owner);
 
       owners[token] = owner;
 
@@ -396,7 +370,6 @@ const useDashboard = () => {
     const obj: TokenData = {};
 
     setTokenOwner(owners);
-    console.log("Collect", collect);
 
     collect.forEach((element: any) => {
       if (obj[element?.token]) {

@@ -37,7 +37,7 @@ const useDetailsCard = ({
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAddr] = useAtom(userAddress);
-  console.log("Update Params", updateParams);
+  // console.log("Update Params", updateParams);
 
   const renderLimitSection = (
     limitType: string,
@@ -45,7 +45,7 @@ const useDetailsCard = ({
     mintOrLock: boolean,
     isAppChain: boolean
   ) => {
-    console.log("Limit Data", limitData);
+    // console.log("Limit Data", limitData);
 
     const handleUpdateButton = () => {
       if (mintOrLock) {
@@ -198,12 +198,12 @@ const useDetailsCard = ({
         currentTokenDecimal
       );
 
-      console.log(
-        mintOrLock,
-        details?.connectorAddr,
-        maxLimitForContract,
-        ratePerSecondForContract
-      );
+      // console.log(
+      //   mintOrLock,
+      //   details?.connectorAddr,
+      //   maxLimitForContract,
+      //   ratePerSecondForContract
+      // );
 
       // return;
 
