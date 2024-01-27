@@ -109,7 +109,11 @@ const Dashboard = () => {
                       className="w-full"
                       onChange={(e) => {
                         setSelectedChain(e);
-                        setRpcUrl(RpcEnum[Number(ChainSlug[e as any])]);
+                        setRpcUrl(
+                          RpcEnum[
+                            Number(ChainSlug[e as keyof typeof ChainSlug])
+                          ]
+                        );
                       }}
                       options={chains}
                     />

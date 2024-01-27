@@ -36,7 +36,7 @@ const useDashboard = () => {
 
   const [selectedChainsDetails, setSelectedChainsDetails] = useState<any>();
 
-  console.log("Selected Chains Details", fetchedResults);
+  console.log("Selected Chains Details", selectedChainsDetails);
 
   const [changeRpcUrl, setChangeRpcUrl] = useState<boolean>(false);
   const [isTextCopied, setIsTextCopied] = useState<boolean>(false);
@@ -93,12 +93,18 @@ const useDashboard = () => {
       getCurrentBurnOrUnlockLimit: string;
     };
     contractAddress: string;
-    connectorAddressList: any;
+    connectorAddressList: {
+      [key: string]: {
+        [key: string]: string;
+      };
+    };
     token: string;
     contractABI: any;
     isAppChain: boolean;
   }) {
     try {
+      console.log("Connector Address List", connectorAddressList);
+
       const provider = new ethers.JsonRpcProvider(rpcUrl);
 
       const contract = new ethers.Contract(
@@ -116,13 +122,20 @@ const useDashboard = () => {
           const constructResult = (
             tokenDecimal: number,
             result: any,
-            currentLimit: any
+            currentLimit: string
           ) => {
             // console.log("DATA TO CONTRUCT", data);
+
             try {
               const maxValue = BigInt(Number.MAX_SAFE_INTEGER);
-              const obj: any = {};
-              Object.values(result).forEach((value: any, index: any) => {
+              const obj: {
+                lastUpdateTimestamp?: number;
+                ratePerSecond?: string;
+                maxLimit?: string;
+                lastUpdateLimit?: string;
+                currentLimit?: string;
+              } = {};
+              Object.values(result).forEach((value: any, index: number) => {
                 if (index === 0) {
                   // const date = new Date(Number(value) * 1000);
                   obj["lastUpdateTimestamp"] = Number(value);
@@ -192,7 +205,7 @@ const useDashboard = () => {
           const obj = {
             token,
             source: selectedChain,
-            DestToken: ChainId[connector as any],
+            DestToken: ChainId[connector as keyof typeof ChainId],
             isAppChain,
             connectorType: curr,
             connectorAddr: currentConnector[curr],
@@ -214,7 +227,7 @@ const useDashboard = () => {
     }
   }
 
-  const handleProjectChange = (e: any) => {
+  const handleProjectChange = (e: Project) => {
     // console.log(e);
 
     setSelectedProject(e);
@@ -243,7 +256,7 @@ const useDashboard = () => {
     }, 2000);
   };
 
-  const handleModeChange = (e: any) => {
+  const handleModeChange = (e: DeploymentMode) => {
     const mode = e;
     setSelectedDeploymentMode(mode);
     getChains(selectedProject!, e);
@@ -275,7 +288,13 @@ const useDashboard = () => {
 
       setRpcUrl(
         RpcEnum[
-          Number(ChainSlug[ChainSlug[Object.keys(addresses)[0] as any] as any])
+          Number(
+            ChainSlug[
+              ChainSlug[
+                Object.keys(addresses)[0] as any
+              ] as keyof typeof ChainSlug
+            ]
+          )
         ]
       );
 
@@ -292,7 +311,7 @@ const useDashboard = () => {
   const fetchLimits = async () => {
     // console.log(selectedChainsDetails);
 
-    const currentChain = ChainSlug[selectedChain as any];
+    const currentChain = ChainSlug[selectedChain as keyof typeof ChainSlug];
 
     if (!selectedChainsDetails) {
       return toast.error("Please select a project", {
@@ -312,10 +331,27 @@ const useDashboard = () => {
 
     const currentChainData = selectedChainsDetails[currentChain];
 
-    const owners: any = {};
+    const owners: DynamicTokenAddresses = {};
 
-    for (const token in currentChainData) {
-      const currentDetails = currentChainData[token];
+    const dummyData: any = {
+      USDC: {
+        isAppChain: true,
+        MintableToken: "0xC06Ed0eB5c0e25fa71B37A3F33CFa62C7d9dD542",
+        ExchangeRate: "0xF31491ea094a2666Bd4BE9E7D72EC903c0407e4e",
+        Controller: "0xC927FBD7254E0f7337Df1D539AA2bd60AFb44F02",
+        connectors: {
+          "421614": {
+            FAST: "0x7050b6f947BA48508219Ac02EC152E9f198ADc5e",
+          },
+          "11155420": {
+            FAST: "0xb584D4bE1A5470CA1a8778E9B86c81e165204599",
+          },
+        },
+      },
+    };
+
+    for (const token in dummyData) {
+      const currentDetails = dummyData[token];
 
       const tokenDecimal = tokenDecimals[token as Tokens];
       const functionToCall = whichFunctionsToCall(currentDetails?.isAppChain);
@@ -357,9 +393,10 @@ const useDashboard = () => {
     }
 
     setIsFetchingResults(false);
-    const obj: any = {};
+    const obj: TokenData = {};
 
     setTokenOwner(owners);
+    console.log("Collect", collect);
 
     collect.forEach((element: any) => {
       if (obj[element?.token]) {

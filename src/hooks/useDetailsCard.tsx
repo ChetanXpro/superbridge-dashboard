@@ -11,6 +11,7 @@ import { AppChainABI } from "../contracts/AppChain";
 import { NonAppChainABI } from "../contracts/NonAppChain";
 import { tokenDecimals } from "../constants/consts";
 import { ChainId } from "@socket.tech/dl-core";
+import { IDetails, UpdateInfo } from "../type/types";
 
 const useDetailsCard = ({
   owner,
@@ -19,35 +20,46 @@ const useDetailsCard = ({
 }: {
   owner: string;
   rpc: string;
-  details: any;
+  details: IDetails;
 }) => {
   const [txnHash, setTxnHash] = useState("");
   const [isTxnSuccess, setIsTxnSuccess] = useState(false);
   const [isTxnFailed, setIsTxnFailed] = useState(false);
 
-  const [updateParams, setUpdateParams] = useState<any>({});
+  const [updateParams, setUpdateParams] = useState<{
+    mintLockOrBurnUnlock: string;
+    maxLimit: number;
+    ratePerSecond: string;
+  }>({
+    mintLockOrBurnUnlock: "",
+    maxLimit: 0,
+    ratePerSecond: "",
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAddr] = useAtom(userAddress);
+  console.log("Update Params", updateParams);
 
   const renderLimitSection = (
     limitType: string,
-    limitData: any,
+    limitData: UpdateInfo,
     mintOrLock: boolean,
     isAppChain: boolean
   ) => {
+    console.log("Limit Data", limitData);
+
     const handleUpdateButton = () => {
       if (mintOrLock) {
         if (!isAppChain) {
           setUpdateParams({
             mintLockOrBurnUnlock: "Lock",
             maxLimit: limitData.maxLimit,
-            ratePerSecond: limitData.ratePerSecond,
+            ratePerSecond: limitData.ratePerSecond.toString(),
           });
         } else {
           setUpdateParams({
             mintLockOrBurnUnlock: "Mint",
             maxLimit: limitData.maxLimit,
-            ratePerSecond: limitData.ratePerSecond,
+            ratePerSecond: limitData.ratePerSecond.toString(),
           });
         }
       } else {
@@ -55,13 +67,13 @@ const useDetailsCard = ({
           setUpdateParams({
             mintLockOrBurnUnlock: "Unlock",
             maxLimit: limitData.maxLimit,
-            ratePerSecond: limitData.ratePerSecond,
+            ratePerSecond: limitData.ratePerSecond.toString(),
           });
         } else {
           setUpdateParams({
             mintLockOrBurnUnlock: "Burn",
             maxLimit: limitData.maxLimit,
-            ratePerSecond: limitData.ratePerSecond,
+            ratePerSecond: limitData.ratePerSecond.toString(),
           });
         }
       }
@@ -133,7 +145,7 @@ const useDetailsCard = ({
             <button
               disabled={userAddr?.toLowerCase() !== owner?.toLowerCase()}
               onClick={handleUpdateButton}
-              className="bg-black w-48 py-1 px-3 rounded-md text-white"
+              className="bg-black w-40 py-1 px-3 rounded-md text-white"
               // size="middle"
             >
               Update {limitType}
@@ -147,7 +159,7 @@ const useDetailsCard = ({
   const updateLimit = async () => {
     try {
       if (!window?.ethereum) return;
-      const CurrentChainId = ChainId[details?.source];
+      const CurrentChainId = ChainId[details?.source as keyof typeof ChainId];
 
       await switchToChain(+CurrentChainId, rpc, details?.source);
 
@@ -163,13 +175,13 @@ const useDetailsCard = ({
       let mintOrLock;
 
       if (
-        updateParams.mintLockOrBurnUnlock === "Mint" ||
-        updateParams.mintLockOrBurnUnlock === "Lock"
+        updateParams?.mintLockOrBurnUnlock === "Mint" ||
+        updateParams?.mintLockOrBurnUnlock === "Lock"
       ) {
         mintOrLock = true;
       } else if (
-        updateParams.mintLockOrBurnUnlock === "Burn" ||
-        updateParams.mintLockOrBurnUnlock === "Unlock"
+        updateParams?.mintLockOrBurnUnlock === "Burn" ||
+        updateParams?.mintLockOrBurnUnlock === "Unlock"
       ) {
         mintOrLock = false;
       }
@@ -222,7 +234,7 @@ const useDetailsCard = ({
   };
 
   const [maxLimit, setMaxLimit] = useState(
-    updateParams.maxLimit && parseFloat(updateParams.maxLimit)
+    updateParams.maxLimit && parseFloat(updateParams.maxLimit.toString())
   );
   const [perSecondRate, setPerSecondRate] = useState(
     updateParams.ratePerSecond && updateParams.ratePerSecond

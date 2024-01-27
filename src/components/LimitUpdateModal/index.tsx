@@ -39,8 +39,12 @@ const LimitUpdateModal = ({
   setMaxLimit: (value: number) => void;
   perSecondRate: string;
   setPerSecondRate: (value: string) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateParams: any;
+
+  updateParams: {
+    mintLockOrBurnUnlock: string;
+    maxLimit: number;
+    ratePerSecond: string;
+  };
   token: string;
 }) => {
   const handleOk = () => {
@@ -69,7 +73,9 @@ const LimitUpdateModal = ({
 
   useEffect(() => {
     setPerSecondRate(updateParams.ratePerSecond && updateParams.ratePerSecond);
-    setMaxLimit(updateParams.maxLimit && parseFloat(updateParams.maxLimit));
+    setMaxLimit(
+      updateParams.maxLimit && parseFloat(updateParams.maxLimit.toString())
+    );
   }, [updateParams]);
 
   useEffect(() => {

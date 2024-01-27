@@ -28,7 +28,7 @@ export interface MintLockOrBurnUnlockInfo {
   ratePerSecond: number;
 }
 
-interface TokenInfo {
+export interface TokenInfo {
   token: string;
   isAppChain: boolean;
   source: string;
@@ -51,4 +51,18 @@ export interface DynamicTokenAddresses {
 export interface Chains {
   label: string;
   value: string;
+}
+
+export interface MintLockOrBurnUnlockInfo {
+  mintLockOrBurnUnlock: string;
+  maxLimit: number;
+  ratePerSecond: number;
+}
+
+export interface UpdateInfo {
+  lastUpdateTimestamp: number;
+  ratePerSecond: number;
+  maxLimit: number;
+  lastUpdateLimit: number;
+  currentLimit: number;
 }

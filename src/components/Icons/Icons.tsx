@@ -9,11 +9,11 @@ export const CorrectGreenIcon = () => (
     className="mx-1"
   >
     <g
-      clip-path="url(#copied_svg__a)"
+      clipPath="url(#copied_svg__a)"
       stroke="#039855"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path d="M19.552 9.154V10a9.09 9.09 0 1 1-5.391-8.31"></path>
       <path d="m20.461 1.818-10 10-2.727-2.727"></path>
