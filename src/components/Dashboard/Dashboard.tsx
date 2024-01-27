@@ -2,13 +2,13 @@ import { ChainSlug, DeploymentMode } from "@socket.tech/socket-plugs";
 
 import { Empty, Input, Select } from "antd";
 
-import { RpcEnum } from "../../constants/consts";
+import { RpcEnum, chainExplorerEnum } from "../../constants/consts";
 
 import DetailsCard from "../DetailCard/DetailsCard";
 import Loading from "../Loading";
 
 import useDashboard from "../../hooks/useDashboard";
-import { CopyIcon, CorrectGreenIcon } from "../Icons/Icons";
+import { CopyIcon, CorrectGreenIcon, OpenExplorerIcon } from "../Icons/Icons";
 import { IDetails } from "../../type/types";
 
 const Dashboard = () => {
@@ -40,7 +40,17 @@ const Dashboard = () => {
     handleModeChange,
     fetchLimits,
     filterOption,
+
+    contractAddressCopyIndex,
+    isContractAddressCopied,
+    copyContractAddrToClipboard,
   } = useDashboard();
+
+  console.log("Result", fetchedResults);
+  console.log(
+    "Selecte=====",
+    ChainSlug[selectedChain as keyof typeof ChainSlug]
+  );
 
   return (
     <div className="flex flex-col justify-between   items-center   min-h-screen w-full">
@@ -149,11 +159,76 @@ const Dashboard = () => {
                   key={index}
                   className="  rounded-lg bg-white  w-full md:w-auto flex flex-col items-center p-2 md:p-10 gap-10 "
                 >
-                  <div className="flex flex-col gap-1 items-center">
+                  <div className="flex flex-col gap-2 items-center">
                     <h1 className=" text-[#344054] text-xl sm:text-[28px] font-semibold flex items-center">
                       {token}
                     </h1>
-                    <div className="flex flex-col gap-3">
+                    {/* <div className="flex   items-start"> */}
+                    <div className="w-full  items-start">
+                      <div className="md:flex  md:gap-3  w-full flex gap-2 text-nowrap  items-center ">
+                        <p className="font-bold">
+                          {fetchedResults[token] &&
+                          fetchedResults[token][0].isAppChain
+                            ? "Controller"
+                            : "Valut"}
+                          :
+                        </p>
+                        <div className="flex   gap-1 items-center">
+                          <p className="text-gray-700">
+                            {fetchedResults[token][0].contractAddress?.slice(
+                              0,
+                              6
+                            ) +
+                              "..." +
+                              fetchedResults[token][0].contractAddress.slice(
+                                -4
+                              )}
+                          </p>
+                          {chainExplorerEnum[
+                            ChainSlug[selectedChain as keyof typeof ChainSlug]
+                          ] && (
+                            <a
+                              href={`${
+                                chainExplorerEnum[
+                                  ChainSlug[
+                                    selectedChain as keyof typeof ChainSlug
+                                  ]
+                                ] || ""
+                              }/address/${
+                                fetchedResults[token][0].contractAddress
+                              }`}
+                              target="_blank"
+                              className="text-blue-500"
+                              rel="noreferrer"
+                            >
+                              <OpenExplorerIcon />
+                            </a>
+                          )}
+                          {isContractAddressCopied &&
+                          contractAddressCopyIndex === index ? (
+                            <div className="cursor-pointer">
+                              <div className="flex items-center font-normal">
+                                <CorrectGreenIcon />
+                                <span className="text-socket-secondary text-sm hidden md:inline-block">
+                                  Copied
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() =>
+                                copyContractAddrToClipboard(
+                                  tokenOwner[token],
+                                  index
+                                )
+                              }
+                              className="cursor-pointer"
+                            >
+                              <CopyIcon />
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       <div className="md:flex  md:gap-3 flex gap-2 text-nowrap  items-center ">
                         <p className="font-bold">Owner :</p>
                         <div className="flex   gap-1 items-center">
@@ -182,6 +257,7 @@ const Dashboard = () => {
                             </div>
                           )}
                         </div>
+                        {/* </div> */}
                       </div>
                     </div>
                   </div>

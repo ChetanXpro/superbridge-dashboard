@@ -23,18 +23,19 @@ export const RpcEnum: RpcEnumType = {
 };
 
 export const chainExplorerEnum: { [key: number]: string } = {
-  11155112: "https://explorer-testnet.aevo.xyz/tx",
-  2999: "https://explorer.aevo.xyz/tx",
-  919: "https://sepolia.explorer.mode.network/tx",
-  901: "https://explorerl2new-prod-testnet-0eakp60405.t.conduit.xyz/tx",
-  957: "https://explorer.lyra.finance/tx",
-  28122024: "https://scanv2-testnet.ancient8.gg/tx",
-  89: "https://testnet.vicscan.xyz/tx",
-  647: "https://explorer.toronto.sx.technology/tx",
-  46658378: "https://hook-stylus-testnet.explorer.caldera.xyz/tx",
-  8453: "https://basescan.org/tx",
-  80001: "https://mumbai.polygonscan.com/tx",
-  11155111: "https://sepolia.etherscan.io/tx",
+  11155112: "https://explorer-testnet.aevo.xyz",
+  2999: "https://explorer.aevo.xyz",
+  919: "https://sepolia.explorer.mode.network",
+  901: "https://explorerl2new-prod-testnet-0eakp60405.t.conduit.xyz",
+  957: "https://explorer.lyra.finance",
+  28122024: "https://scanv2-testnet.ancient8.gg",
+  89: "https://testnet.vicscan.xyz",
+  647: "https://explorer.toronto.sx.technology",
+  46658378: "https://hook-stylus-testnet.explorer.caldera.xyz",
+  8453: "https://basescan.org",
+  80001: "https://mumbai.polygonscan.com",
+  11155111: "https://sepolia.etherscan.io",
+  10: "https://optimistic.etherscan.io",
 };
 
 export const tokenDecimals: { [key in Tokens]: number } = {

@@ -30,9 +30,10 @@ export interface MintLockOrBurnUnlockInfo {
 
 interface TokenInfo {
   token: string;
+  isAppChain: boolean;
   source: string;
   DestToken: string;
-  isAppChain: boolean;
+
   connectorType: string;
   connectorAddr: string;
   contractAddress: string;

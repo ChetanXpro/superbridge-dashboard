@@ -231,6 +231,18 @@ const useDashboard = () => {
     }, 2000);
   };
 
+  const [isContractAddressCopied, setIsContractAddressCopied] = useState(false);
+  const [contractAddressCopyIndex, setContractAddressCopyIndex] = useState(0);
+  const copyContractAddrToClipboard = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setIsContractAddressCopied(true);
+    setContractAddressCopyIndex(index);
+
+    setTimeout(() => {
+      setIsContractAddressCopied(false);
+    }, 2000);
+  };
+
   const handleModeChange = (e: any) => {
     const mode = e;
     setSelectedDeploymentMode(mode);
@@ -398,6 +410,11 @@ const useDashboard = () => {
     getChains,
     filterOption,
     fetchLimits,
+    isContractAddressCopied,
+    setIsContractAddressCopied,
+    contractAddressCopyIndex,
+    setContractAddressCopyIndex,
+    copyContractAddrToClipboard,
   };
 };
 

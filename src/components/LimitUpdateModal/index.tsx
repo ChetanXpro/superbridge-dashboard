@@ -146,7 +146,7 @@ const LimitUpdateModal = ({
                       chainExplorerEnum[
                         ChainSlug[chain as keyof typeof ChainSlug]
                       ] || ""
-                    }/${txnHash}`}
+                    }/tx/${txnHash}`}
                     target="_blank"
                     className="text-blue-500"
                     rel="noreferrer"
