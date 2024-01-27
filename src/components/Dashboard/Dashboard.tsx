@@ -242,7 +242,7 @@ const Dashboard = () => {
                             <div
                               onClick={() =>
                                 copyContractAddrToClipboard(
-                                  tokenOwner[token],
+                                  fetchedResults[token][0].contractAddress,
                                   index
                                 )
                               }
