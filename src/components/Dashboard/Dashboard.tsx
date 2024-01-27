@@ -165,6 +165,33 @@ const Dashboard = () => {
                     </h1>
                     {/* <div className="flex   items-start"> */}
                     <div className="w-full  items-start">
+                      <div className="md:flex  md:gap-3 flex gap-2 text-nowrap  items-center ">
+                        <p className="font-bold">Owner :</p>
+                        <div className="flex   gap-1 items-center">
+                          <p className="text-gray-700">
+                            {tokenOwner[token]?.slice(0, 6) +
+                              "..." +
+                              tokenOwner[token].slice(-4)}
+                          </p>
+                          {isTextCopied && copyTextIndex === index ? (
+                            <div className="cursor-pointer">
+                              <div className="flex items-center font-normal">
+                                <CorrectGreenIcon />
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() =>
+                                copyToClipboard(tokenOwner[token], index)
+                              }
+                              className="cursor-pointer"
+                            >
+                              <CopyIcon />
+                            </div>
+                          )}
+                        </div>
+                        {/* </div> */}
+                      </div>
                       <div className="md:flex  md:gap-3  w-full flex gap-2 text-nowrap  items-center ">
                         <p className="font-bold">
                           {fetchedResults[token] &&
@@ -209,9 +236,6 @@ const Dashboard = () => {
                             <div className="cursor-pointer">
                               <div className="flex items-center font-normal">
                                 <CorrectGreenIcon />
-                                <span className="text-socket-secondary text-sm hidden md:inline-block">
-                                  Copied
-                                </span>
                               </div>
                             </div>
                           ) : (
@@ -228,36 +252,6 @@ const Dashboard = () => {
                             </div>
                           )}
                         </div>
-                      </div>
-                      <div className="md:flex  md:gap-3 flex gap-2 text-nowrap  items-center ">
-                        <p className="font-bold">Owner :</p>
-                        <div className="flex   gap-1 items-center">
-                          <p className="text-gray-700">
-                            {tokenOwner[token]?.slice(0, 6) +
-                              "..." +
-                              tokenOwner[token].slice(-4)}
-                          </p>
-                          {isTextCopied && copyTextIndex === index ? (
-                            <div className="cursor-pointer">
-                              <div className="flex items-center font-normal">
-                                <CorrectGreenIcon />
-                                <span className="text-socket-secondary text-sm hidden md:inline-block">
-                                  Copied
-                                </span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div
-                              onClick={() =>
-                                copyToClipboard(tokenOwner[token], index)
-                              }
-                              className="cursor-pointer"
-                            >
-                              <CopyIcon />
-                            </div>
-                          )}
-                        </div>
-                        {/* </div> */}
                       </div>
                     </div>
                   </div>
