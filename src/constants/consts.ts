@@ -36,6 +36,7 @@ export const chainExplorerEnum: { [key: number]: string } = {
   80001: "https://mumbai.polygonscan.com",
   11155111: "https://sepolia.etherscan.io",
   10: "https://optimistic.etherscan.io",
+  42161: "https://arbiscan.io",
 };
 
 export const tokenDecimals: { [key in Tokens]: number } = {
