@@ -157,3 +157,12 @@ export const whichContractToUse = (isAppChain: boolean) => {
     return "Controller";
   }
 };
+
+
+export const whichTokenToUse = (isAppChain: boolean) => {
+  if (!isAppChain) {
+    return "NonMintableToken";
+  } else {
+    return "MintableToken";
+  }
+};

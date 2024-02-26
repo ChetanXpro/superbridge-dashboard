@@ -23,7 +23,7 @@ const Dashboard = () => {
     rpcUrl,
     setRpcUrl,
     tokenOwner,
-
+    tokenBalance,
     isTextCopied,
 
     changeRpcUrl,
@@ -196,12 +196,13 @@ const Dashboard = () => {
                         </div>
                         {/* </div> */}
                       </div>
+                      
                       <div className="md:flex  md:gap-3  w-full flex gap-2 text-nowrap  items-center ">
                         <p className="font-bold">
                           {fetchedResults[token] &&
                           fetchedResults[token][0].isAppChain
                             ? "Controller"
-                            : "Valut"}
+                            : "Vault"}
                           :
                         </p>
                         <div className="flex   gap-1 items-center">
@@ -256,6 +257,32 @@ const Dashboard = () => {
                             </div>
                           )}
                         </div>
+                      </div>
+                      <div className="md:flex  md:gap-3 flex gap-2 text-nowrap  items-center ">
+                
+                        <p className="font-bold">{token} Balance :</p>
+                        <div className="flex   gap-1 items-center">
+                          <p className="text-gray-700">
+                            {tokenBalance[token] } {token}
+                          </p>
+                          {isTextCopied && copyTextIndex === index ? ( 
+                            <div className="cursor-pointer">
+                              <div className="flex items-center font-normal">
+                                <CorrectGreenIcon />
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() =>
+                                copyToClipboard(tokenBalance[token], index)
+                              }
+                              className="cursor-pointer"
+                            >
+                              <CopyIcon />
+                            </div>
+                          )}
+                        </div>
+                        {/* </div> */}
                       </div>
                     </div>
                   </div>

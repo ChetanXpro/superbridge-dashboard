@@ -9,20 +9,23 @@ import {
 } from "@socket.tech/socket-plugs";
 import { useState } from "react";
 import { RpcEnum, tokenDecimals } from "../constants/consts";
-import { ethers } from "ethers";
+import { ethers, formatUnits } from "ethers";
 import { ChainId } from "@socket.tech/dl-core";
 import toast from "react-hot-toast";
 import { NonAppChainABI } from "../contracts/NonAppChain";
 import { AppChainABI } from "../contracts/AppChain";
+import { ERC20ABI } from "../contracts/ERC20";
 import {
   whichContractToUse,
   whichFunctionsToCall,
+  whichTokenToUse,
 } from "../helper/basicFunctions";
 import { Chains, DynamicTokenAddresses, TokenData } from "../type/types";
 const useDashboard = () => {
   const [selectedDeploymentMode, setSelectedDeploymentMode] =
     useState<DeploymentMode>(DeploymentMode.PROD);
   const [tokenOwner, setTokenOwner] = useState<DynamicTokenAddresses>({});
+  const [tokenBalance, setTokenBalance] = useState<DynamicTokenAddresses>({});
 
   const [selectedChain, setSelectedChain] = useState<string | undefined>("");
 
@@ -326,6 +329,7 @@ const useDashboard = () => {
     const currentChainData = selectedChainsDetails[currentChain];
 
     const owners: DynamicTokenAddresses = {};
+    const balances: DynamicTokenAddresses = {};
 
     for (const token in currentChainData) {
       const currentDetails = currentChainData[token];
@@ -335,7 +339,7 @@ const useDashboard = () => {
       const connectorAddressList = currentDetails.connectors;
 
       const contractAddress = whichContractToUse(currentDetails?.isAppChain);
-
+      const tokenType = whichTokenToUse(currentDetails?.isAppChain);
       const contractABI = currentDetails?.isAppChain
         ? AppChainABI
         : NonAppChainABI;
@@ -350,8 +354,16 @@ const useDashboard = () => {
       );
 
       const owner = await contract.owner();
-
       owners[token] = owner;
+      
+      const tokenContract = new ethers.Contract(
+        currentDetails[tokenType],
+        ERC20ABI,
+        provider
+      );
+
+      const balance: string = await tokenContract.balanceOf(currentDetails[contractAddress]); 
+      balances[token] = (Number(formatUnits(balance, tokenDecimal))).toFixed(4);
 
       await callContractFunction({
         connectorAddressList,
@@ -370,6 +382,7 @@ const useDashboard = () => {
     const obj: TokenData = {};
 
     setTokenOwner(owners);
+    setTokenBalance(balances);
 
     collect.forEach((element: any) => {
       if (obj[element?.token]) {
@@ -388,6 +401,8 @@ const useDashboard = () => {
     setSelectedDeploymentMode,
     tokenOwner,
     setTokenOwner,
+    tokenBalance,
+    setTokenBalance,
     selectedChain,
     setSelectedChain,
     fetchedResults,
