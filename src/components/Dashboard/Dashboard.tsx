@@ -10,7 +10,6 @@ import Loading from "../Loading";
 import useDashboard from "../../hooks/useDashboard";
 import { CopyIcon, CorrectGreenIcon, OpenExplorerIcon } from "../Icons/Icons";
 import { IDetails } from "../../type/types";
-import { useState } from "react";
 
 const Dashboard = () => {
   const {
