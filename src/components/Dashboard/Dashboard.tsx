@@ -10,6 +10,7 @@ import Loading from "../Loading";
 import useDashboard from "../../hooks/useDashboard";
 import { CopyIcon, CorrectGreenIcon, OpenExplorerIcon } from "../Icons/Icons";
 import { IDetails } from "../../type/types";
+import { useState } from "react";
 
 const Dashboard = () => {
   const {
@@ -36,6 +37,7 @@ const Dashboard = () => {
     copyToClipboard,
     handleProjectChange,
 
+    isCopyBalance,
     getChains,
     handleModeChange,
     fetchLimits,
@@ -177,7 +179,9 @@ const Dashboard = () => {
                               "..." +
                               tokenOwner[token].slice(-4)}
                           </p>
-                          {isTextCopied && copyTextIndex === index ? (
+                          {isTextCopied &&
+                          copyTextIndex === index &&
+                          !isCopyBalance ? (
                             <div className="cursor-pointer">
                               <div className="flex items-center font-normal">
                                 <CorrectGreenIcon />
@@ -196,7 +200,7 @@ const Dashboard = () => {
                         </div>
                         {/* </div> */}
                       </div>
-                      
+
                       <div className="md:flex  md:gap-3  w-full flex gap-2 text-nowrap  items-center ">
                         <p className="font-bold">
                           {fetchedResults[token] &&
@@ -259,13 +263,14 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div className="md:flex  md:gap-3 flex gap-2 text-nowrap  items-center ">
-                
                         <p className="font-bold">{token} Balance :</p>
                         <div className="flex   gap-1 items-center">
                           <p className="text-gray-700">
-                            {tokenBalance[token] } {token}
+                            {tokenBalance[token]} {token}
                           </p>
-                          {isTextCopied && copyTextIndex === index ? ( 
+                          {isTextCopied &&
+                          copyTextIndex === index &&
+                          isCopyBalance ? (
                             <div className="cursor-pointer">
                               <div className="flex items-center font-normal">
                                 <CorrectGreenIcon />
@@ -273,9 +278,13 @@ const Dashboard = () => {
                             </div>
                           ) : (
                             <div
-                              onClick={() =>
-                                copyToClipboard(tokenBalance[token], index)
-                              }
+                              onClick={() => {
+                                copyToClipboard(
+                                  tokenBalance[token],
+                                  index,
+                                  true
+                                );
+                              }}
                               className="cursor-pointer"
                             >
                               <CopyIcon />

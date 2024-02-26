@@ -235,9 +235,22 @@ const useDashboard = () => {
     // getChains(selectedDeploymentMode, e);
   };
 
-  const copyToClipboard = (text: string, index: number) => {
+  const [isCopyBalance, setIsCopyBalance] = useState(false);
+  const copyToClipboard = (
+    text: string,
+    index: number,
+    isBalanceCopied?: boolean
+  ) => {
     navigator.clipboard.writeText(text);
     setIsTextCopied(true);
+    console.log("Index", index);
+
+    if (isBalanceCopied) {
+      setIsCopyBalance(true);
+    } else {
+      setIsCopyBalance(false);
+    }
+
     setCopyTextIndex(index);
 
     setTimeout(() => {
@@ -355,15 +368,17 @@ const useDashboard = () => {
 
       const owner = await contract.owner();
       owners[token] = owner;
-      
+
       const tokenContract = new ethers.Contract(
         currentDetails[tokenType],
         ERC20ABI,
         provider
       );
 
-      const balance: string = await tokenContract.balanceOf(currentDetails[contractAddress]); 
-      balances[token] = (Number(formatUnits(balance, tokenDecimal))).toFixed(4);
+      const balance: string = await tokenContract.balanceOf(
+        currentDetails[contractAddress]
+      );
+      balances[token] = Number(formatUnits(balance, tokenDecimal)).toFixed(4);
 
       await callContractFunction({
         connectorAddressList,
@@ -440,6 +455,8 @@ const useDashboard = () => {
     contractAddressCopyIndex,
     setContractAddressCopyIndex,
     copyContractAddrToClipboard,
+    isCopyBalance,
+    setIsCopyBalance,
   };
 };
 
