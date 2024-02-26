@@ -42,16 +42,19 @@ export const tokenDecimals: { [key in Tokens]: number } = {
   [Tokens.Moon]: 18,
   [Tokens.USDC]: 6,
   [Tokens.WETH]: 18,
+  [Tokens.USDCE]: 6,
+  [Tokens.WBTC]: 8,
+  [Tokens.USDT]: 6,
 };
 
-export const tokenName: { [key in Tokens]: string } = {
-  [Tokens.Moon]: "Moon",
-  [Tokens.USDC]: "USD coin",
-  [Tokens.WETH]: "Wrapped Ether",
-};
+// export const tokenName: { [key in Tokens]: string } = {
+//   [Tokens.Moon]: "Moon",
+//   [Tokens.USDC]: "USD coin",
+//   [Tokens.WETH]: "Wrapped Ether",
+// };
 
-export const tokenSymbol: { [key in Tokens]: string } = {
-  [Tokens.Moon]: "MOON",
-  [Tokens.USDC]: "USDC",
-  [Tokens.WETH]: "WETH",
-};
+// export const tokenSymbol: { [key in Tokens]: string } = {
+//   [Tokens.Moon]: "MOON",
+//   [Tokens.USDC]: "USDC",
+//   [Tokens.WETH]: "WETH",
+// };
